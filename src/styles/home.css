@@ -1,0 +1,82 @@
+/* home.css - futuristic hero + neon border + action buttons */
+.home-outer { position:relative; z-index:1; display:flex; justify-content:center; align-items:flex-start; padding:38px 28px; }
+
+.home-container { max-width:1120px; width:100%; margin-top:28px; position:relative; z-index:2; }
+
+/* header */
+.home-header { text-align:left; margin-bottom:18px; color:#dff2ff; }
+.neon-title { font-size:28px; margin:0 0 6px 0; color: #bff0ff; text-shadow: 0 0 12px rgba(128,230,255,0.14), 0 6px 28px rgba(0,0,0,0.5); letter-spacing:0.6px; }
+.subtitle { margin:0; color:#cfeeff; opacity:0.9; }
+
+/* glass card */
+.glass-card {
+  padding:22px;
+  border-radius:14px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid rgba(130,200,255,0.07);
+  box-shadow: 0 12px 36px rgba(6, 12, 30, 0.55);
+  margin-bottom:20px;
+}
+
+/* moving neon border (animated) */
+.neon-border {
+  position: relative;
+  overflow: visible;
+}
+
+.neon-border::before, .neon-border::after {
+  content:"";
+  position:absolute;
+  inset:-2px;
+  z-index:-1;
+  border-radius:16px;
+  background: linear-gradient(90deg, rgba(127,195,255,0.16), rgba(120,255,220,0.06), rgba(140,120,255,0.08));
+  filter: blur(12px);
+  opacity: .85;
+  transform: translateZ(0);
+  animation: neonMove 6s linear infinite;
+}
+
+.neon-border::after { animation-direction: reverse; animation-duration: 8s; filter: blur(22px); opacity:0.6; }
+
+@keyframes neonMove{
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* details grid */
+.detail-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:8px 18px; color:#e6f6ff; font-size:14px; }
+.detail-grid .address { font-size:13px; color:#cfeeff; opacity:0.95; }
+
+/* action row */
+.action-row { margin-top:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+
+/* futuristic button with glow and icon */
+.btn-future {
+  display:inline-flex;
+  gap:10px;
+  align-items:center;
+  padding:8px 14px;
+  border-radius:12px;
+  text-decoration:none;
+  color:#e6f8ff;
+  border:1px solid rgba(120,200,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  box-shadow: 0 8px 30px rgba(20,60,120,0.08);
+}
+
+.btn-future:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(80,180,255,0.12), 0 0 20px rgba(120,200,255,0.08);
+  background: linear-gradient(180deg, rgba(130,220,255,0.07), rgba(140,220,255,0.04));
+}
+
+/* icon styling */
+.icon { width:18px; height:18px; fill: currentColor; opacity:0.95; filter: drop-shadow(0 6px 16px rgba(100,190,255,0.08)); }
+.icon-btn .icon { margin-right:6px; }
+
+/* ensure content appears above canvas */
+.home-container, .glass-card, .btn-future { position: relative; z-index:2; }

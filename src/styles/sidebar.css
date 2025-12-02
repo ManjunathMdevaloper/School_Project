@@ -1,0 +1,27 @@
+/* sidebar.css - modern ERP like sidebar */
+.app-sidebar {
+  width:220px;
+  background: linear-gradient(180deg, rgba(8,12,28,0.96), rgba(6,10,20,0.95));
+  border-right: 1px solid rgba(255,255,255,0.03);
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  z-index:3;
+  min-height:100vh;
+}
+
+.brand { display:flex; align-items:center; gap:10px; }
+.brand-mark { width:44px; height:44px; border-radius:10px; background: linear-gradient(135deg,#7fc3ff,#8affd6); display:flex; align-items:center; justify-content:center; font-weight:800; color:#022032; box-shadow: 0 8px 24px rgba(120,200,255,0.08); }
+.brand-name { font-weight:700; color:#dff7ff; font-size:16px; }
+
+.side-nav { display:flex; flex-direction:column; gap:6px; }
+.nav-item {
+  display:flex; align-items:center; gap:12px; padding:10px; border-radius:10px; color:#d8f2ff; text-decoration:none; font-size:14px;
+  transition: background .12s ease, transform .12s ease;
+}
+.nav-item .ico { width:28px; text-align:center; opacity:0.95; }
+.nav-item:hover { background: rgba(120,200,255,0.04); transform: translateX(6px); }
+.nav-item.active { background: linear-gradient(90deg, rgba(120,200,255,0.08), rgba(140,120,255,0.03)); box-shadow: 0 12px 40px rgba(120,200,255,0.05); }
+
+.sidebar-footer { margin-top:auto; color:#9fb4d8; font-size:12px; opacity:0.9; }

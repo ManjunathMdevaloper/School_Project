@@ -1,0 +1,42 @@
+/* dashboard tiles */
+.tiles-root {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+  margin-top:18px;
+  z-index:2;
+}
+
+.tile-card {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-radius:12px;
+  text-decoration:none;
+  color:inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  transition: transform .16s ease, box-shadow .16s ease;
+  box-shadow: 0 10px 28px rgba(4,12,24,0.5);
+  backdrop-filter: blur(6px);
+}
+
+.tile-card:hover{
+  transform: translateY(-8px);
+  box-shadow: 0 24px 68px rgba(20,60,120,0.18), 0 0 30px rgba(120,200,255,0.06);
+}
+
+.tile-icon{
+  width:48px; height:48px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, rgba(127,195,255,0.12), rgba(120,255,220,0.06));
+  font-size:22px;
+  box-shadow: inset 0 -6px 20px rgba(0,0,0,0.2);
+}
+
+.tile-body { flex:1; }
+.tile-title { font-weight:700; color:#dffaff; margin-bottom:4px; }
+.tile-desc { font-size:13px; color:#cfeeff; opacity:0.9; }
+
+.tile-arrow { font-size:28px; color:rgba(255,255,255,0.12); }

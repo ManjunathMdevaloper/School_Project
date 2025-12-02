@@ -1,0 +1,20 @@
+.student-item {
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+
+  /* Soft highlighted pink */
+  background: #ffe6f2;
+    color: black;
+  border: 1px solid rgba(255, 120, 190, 0.2);
+
+  /* Futuristic glow */
+  box-shadow: 0 6px 18px rgba(255, 120, 190, 0.15);
+
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.student-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(255, 120, 190, 0.25);
+}

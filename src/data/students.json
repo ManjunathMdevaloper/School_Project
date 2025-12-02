@@ -1,0 +1,362 @@
+[
+  {
+    "admissionNo": "2025-001",
+    "firstName": "Ravi",
+    "lastName": "Kumar",
+    "class": "10-A",
+    "rollNo": 1,
+    "email": "ravi.kumar@example.com",
+    "phone": "9000000001"
+  },
+  {
+    "admissionNo": "2025-002",
+    "firstName": "Priya",
+    "lastName": "Reddy",
+    "class": "10-A",
+    "rollNo": 2,
+    "email": "priya.reddy@example.com",
+    "phone": "9000000002"
+  },
+  {
+    "admissionNo": "2025-003",
+    "firstName": "Arjun",
+    "lastName": "Shetty",
+    "class": "10-B",
+    "rollNo": 3,
+    "email": "arjun.shetty@example.com",
+    "phone": "9000000003"
+  },
+  {
+    "admissionNo": "2025-004",
+    "firstName": "Sneha",
+    "lastName": "Naidu",
+    "class": "10-B",
+    "rollNo": 4,
+    "email": "sneha.naidu@example.com",
+    "phone": "9000000004"
+  },
+  {
+    "admissionNo": "2025-005",
+    "firstName": "Kiran",
+    "lastName": "Gowda",
+    "class": "9-A",
+    "rollNo": 5,
+    "email": "kiran.gowda@example.com",
+    "phone": "9000000005"
+  },
+  {
+    "admissionNo": "2025-006",
+    "firstName": "Anita",
+    "lastName": "Sharma",
+    "class": "9-A",
+    "rollNo": 6,
+    "email": "anita.sharma@example.com",
+    "phone": "9000000006"
+  },
+  {
+    "admissionNo": "2025-007",
+    "firstName": "Vikram",
+    "lastName": "Patil",
+    "class": "9-B",
+    "rollNo": 7,
+    "email": "vikram.patil@example.com",
+    "phone": "9000000007"
+  },
+  {
+    "admissionNo": "2025-008",
+    "firstName": "Divya",
+    "lastName": "Menon",
+    "class": "9-B",
+    "rollNo": 8,
+    "email": "divya.menon@example.com",
+    "phone": "9000000008"
+  },
+  {
+    "admissionNo": "2025-009",
+    "firstName": "Rahul",
+    "lastName": "Verma",
+    "class": "8-A",
+    "rollNo": 9,
+    "email": "rahul.verma@example.com",
+    "phone": "9000000009"
+  },
+  {
+    "admissionNo": "2025-010",
+    "firstName": "Keerthi",
+    "lastName": "Rao",
+    "class": "8-A",
+    "rollNo": 10,
+    "email": "keerthi.rao@example.com",
+    "phone": "9000000010"
+  },
+  {
+    "admissionNo": "2025-011",
+    "firstName": "Suresh",
+    "lastName": "Yadav",
+    "class": "8-B",
+    "rollNo": 11,
+    "email": "suresh.yadav@example.com",
+    "phone": "9000000011"
+  },
+  {
+    "admissionNo": "2025-012",
+    "firstName": "Pooja",
+    "lastName": "Mishra",
+    "class": "8-B",
+    "rollNo": 12,
+    "email": "pooja.mishra@example.com",
+    "phone": "9000000012"
+  },
+  {
+    "admissionNo": "2025-013",
+    "firstName": "Tarun",
+    "lastName": "Joshi",
+    "class": "7-A",
+    "rollNo": 13,
+    "email": "tarun.joshi@example.com",
+    "phone": "9000000013"
+  },
+  {
+    "admissionNo": "2025-014",
+    "firstName": "Meena",
+    "lastName": "Kulkarni",
+    "class": "7-A",
+    "rollNo": 14,
+    "email": "meena.kulkarni@example.com",
+    "phone": "9000000014"
+  },
+  {
+    "admissionNo": "2025-015",
+    "firstName": "Shahid",
+    "lastName": "Khan",
+    "class": "7-B",
+    "rollNo": 15,
+    "email": "shahid.khan@example.com",
+    "phone": "9000000015"
+  },
+  {
+    "admissionNo": "2025-016",
+    "firstName": "Aisha",
+    "lastName": "Fatima",
+    "class": "7-B",
+    "rollNo": 16,
+    "email": "aisha.fatima@example.com",
+    "phone": "9000000016"
+  },
+  {
+    "admissionNo": "2025-017",
+    "firstName": "Lokesh",
+    "lastName": "Jain",
+    "class": "6-A",
+    "rollNo": 17,
+    "email": "lokesh.jain@example.com",
+    "phone": "9000000017"
+  },
+  {
+    "admissionNo": "2025-018",
+    "firstName": "Sanjana",
+    "lastName": "Pai",
+    "class": "6-A",
+    "rollNo": 18,
+    "email": "sanjana.pai@example.com",
+    "phone": "9000000018"
+  },
+  {
+    "admissionNo": "2025-019",
+    "firstName": "Mahesh",
+    "lastName": "Deshmukh",
+    "class": "6-B",
+    "rollNo": 19,
+    "email": "mahesh.deshmukh@example.com",
+    "phone": "9000000019"
+  },
+  {
+    "admissionNo": "2025-020",
+    "firstName": "Neha",
+    "lastName": "Shinde",
+    "class": "6-B",
+    "rollNo": 20,
+    "email": "neha.shinde@example.com",
+    "phone": "9000000020"
+  },
+  {
+    "admissionNo": "2025-021",
+    "firstName": "Rohit",
+    "lastName": "Salunkhe",
+    "class": "10-A",
+    "rollNo": 21,
+    "email": "rohit.salunkhe@example.com",
+    "phone": "9000000021"
+  },
+  {
+    "admissionNo": "2025-022",
+    "firstName": "Lavanya",
+    "lastName": "Bhatt",
+    "class": "10-A",
+    "rollNo": 22,
+    "email": "lavanya.bhatt@example.com",
+    "phone": "9000000022"
+  },
+  {
+    "admissionNo": "2025-023",
+    "firstName": "Abhishek",
+    "lastName": "Singh",
+    "class": "10-B",
+    "rollNo": 23,
+    "email": "abhishek.singh@example.com",
+    "phone": "9000000023"
+  },
+  {
+    "admissionNo": "2025-024",
+    "firstName": "Nikita",
+    "lastName": "Saxena",
+    "class": "10-B",
+    "rollNo": 24,
+    "email": "nikita.saxena@example.com",
+    "phone": "9000000024"
+  },
+  {
+    "admissionNo": "2025-025",
+    "firstName": "Harish",
+    "lastName": "Kamble",
+    "class": "9-A",
+    "rollNo": 25,
+    "email": "harish.kamble@example.com",
+    "phone": "9000000025"
+  },
+  {
+    "admissionNo": "2025-026",
+    "firstName": "Shruti",
+    "lastName": "Desai",
+    "class": "9-A",
+    "rollNo": 26,
+    "email": "shruti.desai@example.com",
+    "phone": "9000000026"
+  },
+  {
+    "admissionNo": "2025-027",
+    "firstName": "Gautam",
+    "lastName": "Mali",
+    "class": "9-B",
+    "rollNo": 27,
+    "email": "gautam.mali@example.com",
+    "phone": "9000000027"
+  },
+  {
+    "admissionNo": "2025-028",
+    "firstName": "Rekha",
+    "lastName": "Prasad",
+    "class": "9-B",
+    "rollNo": 28,
+    "email": "rekha.prasad@example.com",
+    "phone": "9000000028"
+  },
+  {
+    "admissionNo": "2025-029",
+    "firstName": "Imran",
+    "lastName": "Syed",
+    "class": "8-A",
+    "rollNo": 29,
+    "email": "imran.syed@example.com",
+    "phone": "9000000029"
+  },
+  {
+    "admissionNo": "2025-030",
+    "firstName": "Chaitra",
+    "lastName": "Murthy",
+    "class": "8-A",
+    "rollNo": 30,
+    "email": "chaitra.murthy@example.com",
+    "phone": "9000000030"
+  },
+  {
+    "admissionNo": "2025-031",
+    "firstName": "Harsha",
+    "lastName": "Kulal",
+    "class": "8-B",
+    "rollNo": 31,
+    "email": "harsha.kulal@example.com",
+    "phone": "9000000031"
+  },
+  {
+    "admissionNo": "2025-032",
+    "firstName": "Rashmi",
+    "lastName": "Chopra",
+    "class": "8-B",
+    "rollNo": 32,
+    "email": "rashmi.chopra@example.com",
+    "phone": "9000000032"
+  },
+  {
+    "admissionNo": "2025-033",
+    "firstName": "Karthik",
+    "lastName": "Iyer",
+    "class": "7-A",
+    "rollNo": 33,
+    "email": "karthik.iyer@example.com",
+    "phone": "9000000033"
+  },
+  {
+    "admissionNo": "2025-034",
+    "firstName": "Anusha",
+    "lastName": "Gopal",
+    "class": "7-A",
+    "rollNo": 34,
+    "email": "anusha.gopal@example.com",
+    "phone": "9000000034"
+  },
+  {
+    "admissionNo": "2025-035",
+    "firstName": "Sathvik",
+    "lastName": "Raj",
+    "class": "7-B",
+    "rollNo": 35,
+    "email": "sathvik.raj@example.com",
+    "phone": "9000000035"
+  },
+  {
+    "admissionNo": "2025-036",
+    "firstName": "Mythili",
+    "lastName": "Krishnan",
+    "class": "7-B",
+    "rollNo": 36,
+    "email": "mythili.krishnan@example.com",
+    "phone": "9000000036"
+  },
+  {
+    "admissionNo": "2025-037",
+    "firstName": "Pranav",
+    "lastName": "Bose",
+    "class": "6-A",
+    "rollNo": 37,
+    "email": "pranav.bose@example.com",
+    "phone": "9000000037"
+  },
+  {
+    "admissionNo": "2025-038",
+    "firstName": "Gayathri",
+    "lastName": "Suresh",
+    "class": "6-A",
+    "rollNo": 38,
+    "email": "gayathri.suresh@example.com",
+    "phone": "9000000038"
+  },
+  {
+    "admissionNo": "2025-039",
+    "firstName": "Tejas",
+    "lastName": "Kulkarni",
+    "class": "6-B",
+    "rollNo": 39,
+    "email": "tejas.kulkarni@example.com",
+    "phone": "9000000039"
+  },
+  {
+    "admissionNo": "2025-040",
+    "firstName": "Samruddhi",
+    "lastName": "Hegde",
+    "class": "6-B",
+    "rollNo": 40,
+    "email": "samruddhi.hegde@example.com",
+    "phone": "9000000040"
+  }
+]
