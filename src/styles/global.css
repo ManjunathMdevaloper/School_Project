@@ -43,9 +43,9 @@
 
 .dark {
   /* Dark Mode (Cyberpunk / Holo) */
-  --bg-primary: #050505;
-  --bg-secondary: #0A0A0F;
-  --bg-accent: #12121A;
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-accent: #0A0A0F;
 
   --text-primary: #E0FFFF;
   --text-secondary: #8FA1B3;
@@ -305,6 +305,12 @@ h6 {
   outline: none;
   border-color: var(--primary-color);
   background: rgba(0, 243, 255, 0.05);
+}
+
+/* Ensure dropdown options follow theme */
+select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .animate-float {

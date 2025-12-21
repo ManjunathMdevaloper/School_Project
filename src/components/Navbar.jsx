@@ -13,20 +13,21 @@ const Navbar = () => {
   const location = useLocation();
 
   const today = new Date().toISOString().split('T')[0];
-  const pendingOutpasses = outpasses.filter(o => o.status === 'Pending' && o.timestamp.startsWith(today));
+  // Ensure status check is case-insensitive (PENDING vs Pending)
+  const pendingOutpasses = outpasses.filter(o => o.status && o.status.toUpperCase() === 'PENDING');
 
   const navLinks = [
     { name: 'Home', path: '/home' },
     { name: 'Students', path: '/students' },
-    { name: 'Overview', path: '/overview' },
-    { name: 'Outpass', path: '/outpass' },
+    userRole === 'admin' && { name: 'Schedules', path: '/schedules' },
+    { name: 'Attendance', path: '/attendance' }, 
     {
       name: 'Manage',
       dropdown: [
-        { name: 'Attendance', path: '/attendance' },
         { name: 'Marks', path: '/marks' },
-        userRole === 'admin' && { name: 'Schedules', path: '/schedules' },
+        { name: 'Overview', path: '/overview' },
         { name: 'Manage Student Data', path: '/manage' },
+        { name: 'Outpass', path: '/outpass' },
       ].filter(Boolean)
     },
   ];

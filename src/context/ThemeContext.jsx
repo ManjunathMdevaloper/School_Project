@@ -8,7 +8,7 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(() => {
-        const savedTheme = localStorage.getItem('theme');
+        const savedTheme = localStorage.getItem('veda-management-theme');
         return savedTheme === 'dark'; // Default to light if not set or set to light
     });
 
@@ -16,10 +16,10 @@ export const ThemeProvider = ({ children }) => {
         const root = window.document.documentElement;
         if (isDarkMode) {
             root.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
+            localStorage.setItem('veda-management-theme', 'dark');
         } else {
             root.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
+            localStorage.setItem('veda-management-theme', 'light');
         }
     }, [isDarkMode]);
 

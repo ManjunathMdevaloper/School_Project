@@ -44,8 +44,7 @@ const StudentList = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const newId = addStudent(formData);
+    addStudent(formData).then(newId => {
       setIsModalOpen(false);
       setMessage(`Student added successfully! Admission No: ${newId}`);
       setTimeout(() => setMessage(''), 5000);
@@ -58,10 +57,10 @@ const StudentList = () => {
         phone: '',
         parentName: ''
       });
-    } catch (error) {
+    }).catch(error => {
       console.error("Failed to add student:", error);
       setMessage(`Error: ${error.message}`);
-    }
+    });
   };
 
   const handleBulkUpload = (e) => {
@@ -100,12 +99,17 @@ const StudentList = () => {
         });
 
         if (studentsToAdd.length > 0) {
-          const count = addStudentsBulk(studentsToAdd);
-          setMessage(`Successfully added ${count} students from Excel.`);
+          addStudentsBulk(studentsToAdd).then(count => {
+            setMessage(`Successfully added ${count} students from Excel.`);
+            setTimeout(() => setMessage(''), 5000);
+          }).catch(err => {
+            setMessage(`Error: Some students could not be added.`);
+            setTimeout(() => setMessage(''), 5000);
+          });
         } else {
           setMessage('Error: No valid student records found in Excel. Please check column names.');
+          setTimeout(() => setMessage(''), 5000);
         }
-        setTimeout(() => setMessage(''), 5000);
 
       } catch (error) {
         console.error("Error parsing Excel:", error);

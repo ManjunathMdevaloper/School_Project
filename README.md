@@ -1,4 +1,4 @@
-# 7Veda Management System (Sri Sudha School)
+# 7Veda Management System
 
 A comprehensive, futuristic, and responsive school management web application built with **React** and **Vite**. This system is designed to streamline administrative tasks, student data management, and communication within the school.
 

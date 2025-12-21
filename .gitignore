@@ -22,3 +22,26 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/.metadata/
+
+# Java/Maven
+backend/target/
+backend/.mvn/
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/*.zip
+backend/*.tar.gz
+backend/*.rar
+backend/.factorypath
+backend/.project
+backend/.settings/
+backend/.classpath
+backend/bin/
+backend/.metadata/
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr

@@ -7,10 +7,11 @@ const Outpass = () => {
     const [formData, setFormData] = useState({
         admissionNo: '',
         reason: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('en-CA'),
         timeOut: '',
         timeIn: ''
     });
+    const today = new Date().toLocaleDateString('en-CA');
     const [message, setMessage] = useState('');
 
     // Filter students based on selected class
@@ -39,7 +40,7 @@ const Outpass = () => {
         setFormData({
             admissionNo: '',
             reason: '',
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toLocaleDateString('en-CA'),
             timeOut: '',
             timeIn: ''
         });
@@ -98,6 +99,7 @@ const Outpass = () => {
                                     type="date"
                                     className="form-control"
                                     value={formData.date}
+                                    min={today}
                                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                     required
                                 />

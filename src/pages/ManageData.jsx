@@ -177,7 +177,13 @@ const ManageData = () => {
                 head: attendanceHeaders,
                 body: attendanceData,
                 theme: 'grid',
-                headStyles: { fillColor: [22, 163, 74] } // Greenish
+                headStyles: { fillColor: [22, 163, 74] }, // Greenish
+                didParseCell: (data) => {
+                    if (data.section === 'body' && data.cell.text[0] === 'Absent') {
+                        data.cell.styles.textColor = [185, 28, 28]; // Red
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                }
             });
 
             yPos = doc.lastAutoTable.finalY + 15;
@@ -207,7 +213,27 @@ const ManageData = () => {
                 head: marksHeaders,
                 body: marksData,
                 theme: 'grid',
-                headStyles: { fillColor: [37, 99, 235] } // Blueish
+                headStyles: { fillColor: [37, 99, 235] }, // Blueish
+                didParseCell: (data) => {
+                    if (data.section === 'body') {
+                        const cellText = data.cell.text[0];
+                        const marksIndex = filterType === 'all' ? 2 : 1;
+                        const statusIndex = filterType === 'all' ? 3 : 2;
+
+                        // Check if this is the marks column or status column
+                        const isMarksCol = data.column.index === marksIndex;
+                        const isStatusCol = data.column.index === statusIndex;
+
+                        if (isStatusCol && (cellText === 'Absent' || cellText === 'Fail' || cellText === 'absent')) {
+                            data.cell.styles.textColor = [185, 28, 28];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        if (isMarksCol && !isNaN(cellText) && Number(cellText) < 35) {
+                            data.cell.styles.textColor = [185, 28, 28];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                }
             });
         }
 

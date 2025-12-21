@@ -31,7 +31,7 @@ const Marks = () => {
   const classes = React.useMemo(() => {
     const allClasses = [...new Set(students.map(s => s.class))].sort();
     if (selectedSchedule) {
-      const schedule = examSchedules.find(s => s.id === selectedSchedule);
+      const schedule = examSchedules.find(s => String(s.id) === String(selectedSchedule));
       if (schedule && schedule.classes && schedule.classes.length > 0) {
         return allClasses.filter(c => schedule.classes.includes(c));
       }
@@ -279,7 +279,7 @@ const Marks = () => {
 
                       // Auto-set date if schedule is selected
                       if (selectedSchedule) {
-                        const schedule = examSchedules.find(s => s.id === selectedSchedule);
+                        const schedule = examSchedules.find(s => String(s.id) === String(selectedSchedule));
                         const subjectSch = schedule?.subjects.find(s => s.subject === newSubject);
                         if (subjectSch) {
                           setExamDate(subjectSch.date);
@@ -291,7 +291,7 @@ const Marks = () => {
                     <option value="">-- Select Subject --</option>
                     {selectedSchedule ? (
                       // Show subjects from selected schedule
-                      examSchedules.find(s => s.id === selectedSchedule)?.subjects.map((s, i) => (
+                      examSchedules.find(s => String(s.id) === String(selectedSchedule))?.subjects.map((s, i) => (
                         <option key={i} value={s.subject}>{s.subject} ({s.date})</option>
                       ))
                     ) : (
