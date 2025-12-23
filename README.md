@@ -1,97 +1,123 @@
-# 7Veda Management System
+# 7Veda Management System 🚀
 
-A comprehensive, futuristic, and responsive school management web application built with **React** and **Vite**. This system is designed to streamline administrative tasks, student data management, and communication within the school.
+A comprehensive, futuristic, and robust **Full-Stack School Management System**. This project integrates a modern **React** frontend with a powerful **Spring Boot** backend and a **MySQL** database to provide a seamless administrative experience.
 
-## 🚀 Features
+---
 
-### 🔐 Role-Based Access Control (RBAC)
-*   **Admin Portal:** Full access to all features including student management, schedule creation, and outpass approvals.
-*   **Faculty Portal:** Restricted access focused on viewing data, attendance, and marks entry.
-*   **Secure Login:** Distinct login credentials for different roles.
+## 🏗️ Project Architecture
 
-### 🎓 Student Management
-*   **Centralized Database:** View and manage detailed student records.
-*   **Bulk Operations:** Import student data via Excel (`.xlsx`) files.
-*   **CRUD Actions:** Add, Edit, and Delete student profiles (Admin only).
-*   **Search & Filter:** Easily find students by name or class.
+The system follows a classic client-server architecture:
+- **Frontend:** React.js (Vite) - Cyberpunk/Futuristic UI with Glassmorphism.
+- **Backend:** Spring Boot (Java) - RESTful API with JPA/Hibernate.
+- **Database:** MySQL - Persistent storage for students, attendance, marks, and outpasses.
 
-### 📝 Academic Management
-*   **Marks Entry:** Record marks for various subjects and months.
-*   **Auto-Grading:** Automatically calculates "Pass" or "Fail" status based on marks.
-*   **Exam Schedules:** Create and manage exam timetables with "Total Marks" indicators.
-*   **Attendance Tracking:** Mark and monitor daily student attendance.
-
-### 🚪 Outpass System
-*   **Digital Requests:** Create outpass requests with reasons and timing.
-*   **Admin Notification Center:** Real-time bell icon notifications for pending requests.
-*   **Quick Actions:** Admins can "Accept" or "Reject" requests directly from the navbar dropdown.
-*   **Status Tracking:** Visual indicators (Green/Red/Yellow) for Approved/Rejected/Pending statuses.
-
-### 🎨 UI/UX & Design
-*   **Futuristic Aesthetic:** Glassmorphism effects, neon glows, and smooth transitions.
-*   **Responsive Design:** Fully optimized for Desktop, Tablet, and Mobile devices.
-*   **Theme Support:** Toggle between Light (Sci-Fi Lab) and Dark (Cyberpunk) modes.
-*   **Interactive Elements:** Hover effects, animated modals, and dynamic badges.
+---
 
 ## 🛠️ Tech Stack
 
-*   **Frontend Framework:** React 19
-*   **Build Tool:** Vite
-*   **Routing:** React Router DOM
-*   **Styling:** Vanilla CSS (CSS Variables, Flexbox, Grid)
-*   **Data Handling:** XLSX (Excel export/import), jsPDF (PDF generation)
-*   **State Management:** React Context API (`AuthContext`, `StudentContext`, `ThemeContext`)
+### **Frontend**
+- **Framework:** React 19
+- **Build Tool:** Vite
+- **State Management:** React Context API
+- **Styling:** Vanilla CSS (Modern CSS Variables & Animations)
+- **Utilities:** Lucide React (Icons), XLSX (Excel), jsPDF
 
-## 📦 Installation & Setup
+### **Backend**
+- **Framework:** Spring Boot 3.x
+- **Language:** Java 17+
+- **Security:** Spring Security (Basic Auth / Logic-based RBAC)
+- **Persistence:** Spring Data JPA
+- **Database:** MySQL 8.0
+- **Build Tool:** Maven
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/ManjunathMdevaloper/School_Project.git
-    cd School_Project
-    ```
+---
 
-2.  **Install dependencies**
-    ```bash
-    npm install
-    ```
+## 🌟 Key Features
 
-3.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
+### 🔐 Multi-Role Access Control
+- **Admin:** Complete control over Student CRUD, Exam Schedules, and Outpass approvals.
+- **Faculty:** Access to view student lists, mark attendance, and enter academic marks.
+- **Automated Login:** Intelligent session handling and redirection based on roles.
 
-4.  **Build for production**
-    ```bash
-    npm run build
-    ```
+### 🎓 Student & Academic Management
+- **Persistent Student Records:** All data is stored in MySQL, eliminating data loss on refresh.
+- **Bulk Data Import:** Support for importing student lists and marks via Excel files.
+- **Attendance Persistence:** Robust attendance tracking with upsert (insert/update) logic.
+- **Mark Management:** Academic performance tracking with automatic Grade/Status calculation.
 
-## 🔑 Default Credentials
+### 🚪 Automated Outpass System
+- **Real-Time Notifications:** Admin Navbar features a live notification bell with hover dropdown.
+- **One-Click Approval:** Approve or Reject outpasses directly from the notification center.
+- **Persistence Logic:** Outpasses are linked to persistent Student entities in the database.
 
-Use the following credentials to test the role-based features:
+### 🎨 Premium Sci-Fi UI
+- **Dual Themes:** Toggle between "Sci-Fi Lab" (Light) and "Cyberpunk Night" (Dark).
+- **Glassmorphism:** Elegant frosted-glass effects on cards and modals.
+- **Responsive Layout:** optimized for 1440p monitors down to small mobile screens.
 
-| Role    | Username | Password | Access Level |
-| :------ | :------- | :------- | :----------- |
-| **Admin**   | `admin`  | `admin`  | Full Control (Manage Students, Schedules, Outpasses) |
-| **Faculty** | `fac1`   | `123`    | Limited Access (View Data, Marks, Attendance) |
-
-## 📱 Mobile Experience
-
-The application is fully responsive. On mobile devices:
-*   **Navigation:** Accessible via a hamburger menu.
-*   **Notifications:** Admin notifications are available in the mobile drawer.
-*   **Layout:** Cards and grids stack vertically for better readability.
+---
 
 ## 📂 Project Structure
 
-```
-src/
-├── components/   # Reusable UI components (Navbar, etc.)
-├── context/      # Global state management (Auth, Student, Theme)
-├── data/         # Initial mock data
-├── pages/        # Main application pages (Home, StudentList, etc.)
-├── styles/       # CSS files (global.css, etc.)
-└── App.jsx       # Main application entry point
+```text
+7veda-management/
+├── backend/                # Java Spring Boot Application
+│   ├── src/main/java/...   # Controllers, Services, Entities, Repositories
+│   ├── src/main/resources/ # application.properties, students.json (seed)
+│   └── pom.xml             # Maven dependencies
+├── src/                    # React Frontend Application
+│   ├── components/         # Premium UI Components (Navbar, GlassCards)
+│   ├── context/            # Logic (Auth, Student, Theme Context)
+│   ├── pages/              # Functional Pages (Dashboard, Attendance, etc.)
+│   └── styles/             # Global CSS & Theme variables
+├── package.json            # Frontend dependencies
+└── README.md               # Documentation
 ```
 
 ---
-*Developed by Manjunath*
+
+## 🚀 Getting Started
+
+### **Prerequisites**
+- **Java 17** or higher
+- **Node.js** (v18+)
+- **MySQL Server**
+
+### **1. Database Setup**
+- Create a database named `veda-management` in your MySQL server.
+- Update `backend/src/main/resources/application.properties` with your MySQL username and password.
+
+### **2. Backend Setup**
+```bash
+cd backend
+mvn clean install
+mvn spring-boot:run
+```
+*The API will be available at `http://localhost:8080`*
+
+### **3. Frontend Setup**
+```bash
+# From the root directory
+npm install
+npm run dev
+```
+*The app will be available at `http://localhost:5173` (or 5174)*
+
+---
+
+## 🔑 Default Credentials
+
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin` | `admin` |
+| **Faculty** | `fac1` | `123` |
+
+---
+
+## 🛠️ Maintenance & Development
+- **Backend Port:** 8080
+- **CORS Config:** Enabled for `localhost:5173` and `localhost:5174`.
+- **Auto-Seeding:** The `DataLoader.java` automatically seeds the database with initial student data from `students.json` on the first run.
+
+---
+*Developed with Passion by Manjunath*
