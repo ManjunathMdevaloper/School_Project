@@ -13,6 +13,7 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [filterClass, setFilterClass] = useState('');
+  const [activeTab, setActiveTab] = useState('single');
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -139,21 +140,9 @@ const StudentList = () => {
           </div>
           <div className="flex gap-4">
             {userRole === 'admin' && (
-              <>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleBulkUpload}
-                  style={{ display: 'none' }}
-                  accept=".xlsx, .xls"
-                />
-                <button className="btn btn-outline" onClick={() => fileInputRef.current.click()}>
-                  Import Excel
-                </button>
-                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                  + Add Student
-                </button>
-              </>
+              <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                + Register Student
+              </button>
             )}
           </div>
         </div>
@@ -180,23 +169,23 @@ const StudentList = () => {
         </div>
 
         {message && (
-          <div className={`card mb-5 p-4 rounded-lg flex items-center gap-3 ${message.includes('Error') ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}
-            style={{ border: '1px solid currentColor' }}>
-            {message}
+          <div className={`badge ${message.includes('Error') ? 'badge-error' : 'badge-success'} mb-8 p-6 rounded-xl flex items-center justify-center gap-3`}
+            style={{ width: '100%', fontSize: '1.1rem', border: '1px solid currentColor', minHeight: '60px' }}>
+            {message.includes('Error') ? '❌' : '✅'} {message}
           </div>
         )}
 
         <div className="card table-container">
-          <table className="table">
+          <table className="table table-wide">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Admission No</th>
                 <th>Full Name</th>
                 <th>Class</th>
                 <th>Roll No</th>
                 <th>Parent Name</th>
                 <th>Contact</th>
-                <th>Actions</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -245,81 +234,123 @@ const StudentList = () => {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h2 className="modal-title">Add New Student</h2>
+              <h2 className="modal-title">Student Registration</h2>
               <button className="close-btn" onClick={() => {
                 setIsModalOpen(false);
                 setIsManualClass(false);
+                setActiveTab('single');
               }}>&times;</button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2" style={{ gap: '1.5rem' }}>
-                <div className="form-group">
-                  <label className="form-label">First Name</label>
-                  <input required name="firstName" value={formData.firstName} onChange={handleInputChange} className="form-control" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Last Name</label>
-                  <input required name="lastName" value={formData.lastName} onChange={handleInputChange} className="form-control" />
-                </div>
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <label className="form-label" style={{ marginBottom: 0 }}>Class Division</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsManualClass(!isManualClass);
-                        setFormData(prev => ({ ...prev, class: '' }));
-                      }}
-                      style={{ fontSize: '0.7rem', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer' }}
-                    >
-                      {isManualClass ? 'Switch to Select' : 'Type Manually'}
+            <div className="tabs-container">
+              <button
+                className={`tab-btn ${activeTab === 'single' ? 'active' : ''}`}
+                onClick={() => setActiveTab('single')}
+              >
+                Single Entry
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'bulk' ? 'active' : ''}`}
+                onClick={() => setActiveTab('bulk')}
+              >
+                Bulk Import
+              </button>
+            </div>
+
+            <div className="tab-content">
+              {activeTab === 'single' ? (
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-2" style={{ gap: '1.5rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">First Name</label>
+                      <input required name="firstName" value={formData.firstName} onChange={handleInputChange} className="form-control" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Last Name</label>
+                      <input required name="lastName" value={formData.lastName} onChange={handleInputChange} className="form-control" />
+                    </div>
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <label className="form-label" style={{ marginBottom: 0 }}>Class Division</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsManualClass(!isManualClass);
+                            setFormData(prev => ({ ...prev, class: '' }));
+                          }}
+                          style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                          {isManualClass ? 'Switch to Select' : 'Type Manually'}
+                        </button>
+                      </div>
+
+                      {!isManualClass ? (
+                        <CustomSelect
+                          value={formData.class}
+                          onChange={(e) => handleInputChange({ target: { name: 'class', value: e.target.value } })}
+                          options={classes.map(c => ({ value: c, label: c }))}
+                          placeholder="Select Class"
+                        />
+                      ) : (
+                        <input
+                          required
+                          type="text"
+                          name="class"
+                          placeholder="e.g. 10th Grade"
+                          value={formData.class}
+                          onChange={handleInputChange}
+                          className="form-control"
+                        />
+                      )}
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Roll Number</label>
+                      <input required type="text" name="rollNo" value={formData.rollNo} onChange={handleInputChange} className="form-control" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Parent Name</label>
+                      <input required name="parentName" value={formData.parentName} onChange={handleInputChange} className="form-control" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Phone Number</label>
+                      <input required name="phone" value={formData.phone} onChange={handleInputChange} className="form-control" />
+                    </div>
+                  </div>
+                  <div className="form-group mt-4">
+                    <label className="form-label">Email Address</label>
+                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="form-control" />
+                  </div>
+                  <div className="text-center mt-6">
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} disabled={isSubmitting}>
+                      {isSubmitting ? 'Registering...' : 'Complete Registration'}
                     </button>
                   </div>
-
-                  {!isManualClass ? (
-                    <CustomSelect
-                      value={formData.class}
-                      onChange={(e) => handleInputChange({ target: { name: 'class', value: e.target.value } })}
-                      options={classes.map(c => ({ value: c, label: c }))}
-                      placeholder="Select Class"
-                    />
-                  ) : (
-                    <input
-                      required
-                      type="text"
-                      name="class"
-                      placeholder="e.g. 10th Grade"
-                      value={formData.class}
-                      onChange={handleInputChange}
-                      className="form-control"
-                    />
-                  )}
+                </form>
+              ) : (
+                <div className="py-8 text-center">
+                  <div className="mb-6">
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                    <h3 style={{ color: 'var(--primary-color)' }}>Bulk Excel Registration</h3>
+                    <p className="text-secondary">Upload an Excel file with these columns:<br />First Name, Last Name, Class, Roll No, Phone, Parent Name</p>
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleBulkUpload}
+                    style={{ display: 'none' }}
+                    accept=".xlsx, .xls"
+                  />
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => fileInputRef.current.click()}
+                    style={{ padding: '1.5rem 3rem', borderStyle: 'dashed', borderWidth: '2px' }}
+                  >
+                    Select Excel File
+                  </button>
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">Roll Number</label>
-                  <input required type="text" name="rollNo" value={formData.rollNo} onChange={handleInputChange} className="form-control" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Parent Name</label>
-                  <input required name="parentName" value={formData.parentName} onChange={handleInputChange} className="form-control" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <input required name="phone" value={formData.phone} onChange={handleInputChange} className="form-control" />
-                </div>
-              </div>
-              <div className="form-group mt-4">
-                <label className="form-label">Email Address</label>
-                <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="form-control" />
-              </div>
-              <div className="text-center mt-6">
-                <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting}>
-                  {isSubmitting ? 'Registering...' : 'Complete Registration'}
-                </button>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         </div>
       )}

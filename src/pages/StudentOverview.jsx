@@ -127,9 +127,9 @@ const StudentOverview = () => {
         {student ? (
           <div className="grid grid-cols-1 gap-large" style={{ display: 'grid', gap: '2rem' }}>
             {/* Profile Section */}
-            <div className="card profile-card">
-              <div className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
-                <div className="profile-avatar" style={{ width: '80px', height: '80px', background: 'var(--bg-accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '2.5rem' }}>🎓</div>
+            <div className="card profile-card" style={{ padding: '2rem' }}>
+              <div className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                <div className="profile-avatar" style={{ width: '80px', height: '80px', background: 'rgba(197, 160, 89, 0.1)', border: '2px solid var(--secondary-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>🎓</div>
                 <div className="profile-info">
                   <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{student.firstName} {student.lastName}</h2>
                   <p className="text-secondary">{student.admissionNo}</p>
@@ -137,51 +137,51 @@ const StudentOverview = () => {
               </div>
 
               <div className="profile-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
-                <div className="detail-box">
-                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Class</span>
-                  <span className="value" style={{ fontWeight: 600 }}>{student.class}</span>
+                <div className="detail-box" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="label" style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class</span>
+                  <span className="value" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{student.class}</span>
                 </div>
-                <div className="detail-box">
-                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Roll No</span>
-                  <span className="value" style={{ fontWeight: 600 }}>{student.rollNo}</span>
+                <div className="detail-box" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="label" style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Roll No</span>
+                  <span className="value" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{student.rollNo}</span>
                 </div>
-                <div className="detail-box">
-                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Parent</span>
-                  <span className="value" style={{ fontWeight: 600 }}>{student.parentName || 'N/A'}</span>
+                <div className="detail-box" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="label" style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Parent</span>
+                  <span className="value" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{student.parentName || 'N/A'}</span>
                 </div>
-                <div className="detail-box">
-                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Contact</span>
-                  <span className="value" style={{ fontWeight: 600 }}>{student.phone}</span>
+                <div className="detail-box" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="label" style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact</span>
+                  <span className="value" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{student.phone}</span>
                 </div>
-                <div className="detail-box">
-                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Email</span>
-                  <span className="value" style={{ fontWeight: 600 }}>{student.email || 'N/A'}</span>
+                <div className="detail-box" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="label" style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</span>
+                  <span className="value" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{student.email || 'N/A'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="grid grid-cols-2">
               {/* Attendance Stats */}
               <div className="card">
                 <h3 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Attendance Overview</h3>
                 <div className="attendance-chart" style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-                  <div className="percentage-circle" style={{ width: '120px', height: '120px', borderRadius: '50%', border: '8px solid var(--primary-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(44, 182, 125, 0.2)' }}>
-                    <span className="percentage" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary-color)' }}>{attendancePercentage}%</span>
+                  <div className="percentage-circle" style={{ width: '120px', height: '120px', borderRadius: '50%', border: '8px solid var(--primary-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(44, 182, 125, 0.2)', background: 'rgba(44, 182, 125, 0.05)' }}>
+                    <span className="percentage" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary-color)' }}>{attendancePercentage}%</span>
                     <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Overall</span>
                   </div>
                 </div>
                 <div className="attendance-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div className="stat-box present" style={{ padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', background: 'rgba(44, 182, 125, 0.1)', color: '#2CB67D' }}>
-                    <span className="count" style={{ display: 'block', fontSize: '1.5rem', fontWeight: 700 }}>{presentDays}</span>
-                    <span className="label" style={{ fontSize: '0.8rem' }}>Present</span>
+                  <div className="stat-box present" style={{ padding: '1.25rem', borderRadius: 'var(--radius-md)', textAlign: 'center', background: 'var(--success-bg)', color: 'var(--success-text)' }}>
+                    <span className="count" style={{ display: 'block', fontSize: '1.75rem', fontWeight: 800 }}>{presentDays}</span>
+                    <span className="label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Present</span>
                   </div>
-                  <div className="stat-box absent" style={{ padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}>
-                    <span className="count" style={{ display: 'block', fontSize: '1.5rem', fontWeight: 700 }}>{absentDays}</span>
-                    <span className="label" style={{ fontSize: '0.8rem' }}>Absent</span>
+                  <div className="stat-box absent" style={{ padding: '1.25rem', borderRadius: 'var(--radius-md)', textAlign: 'center', background: 'var(--error-bg)', color: 'var(--error-text)' }}>
+                    <span className="count" style={{ display: 'block', fontSize: '1.75rem', fontWeight: 800 }}>{absentDays}</span>
+                    <span className="label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>Absent</span>
                   </div>
                 </div>
-                <div className="text-center mt-4 text-secondary" style={{ textAlign: 'center', marginTop: '1rem' }}>
-                  Absent with Intimation: <strong>{absentWithIntimation}</strong>
+                <div className="text-center mt-4 text-secondary" style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
+                  Intimated Absences: <strong style={{ color: 'var(--warning-text)' }}>{absentWithIntimation}</strong>
                 </div>
               </div>
 
@@ -217,7 +217,7 @@ const StudentOverview = () => {
 
 
             {/* Second Row: Outpasses (Small) and Marks (Large) */}
-            <div className="grid" style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: '1.5rem' }}>
+            <div className="grid grid-stats">
               {/* Outpass History */}
               <div className="card">
                 <h3 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Recent Outpasses</h3>
@@ -238,7 +238,11 @@ const StudentOverview = () => {
                           <tr key={op.id}>
                             <td style={{ padding: '0.5rem' }}>{op.date}</td>
                             <td style={{ padding: '0.5rem' }}>{op.reason}</td>
-                            <td style={{ padding: '0.5rem' }}><span className="badge" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem', background: '#fef3c7', color: '#b45309' }}>{op.status}</span></td>
+                            <td style={{ padding: '0.5rem' }}>
+                              <span className={`badge ${op.status === 'Approved' ? 'badge-success' : op.status === 'Rejected' ? 'badge-error' : 'badge-warning'}`}>
+                                {op.status}
+                              </span>
+                            </td>
                           </tr>
                         ))
                       )}
@@ -296,17 +300,10 @@ const StudentOverview = () => {
                                 {new Date(mark.month + '-01').toLocaleString('default', { month: 'short', year: 'numeric' })}
                               </td>
                             )}
-                            <td style={{ padding: '0.5rem', fontWeight: '500' }}>{mark.subject}</td>
-                            <td style={{ padding: '0.5rem' }}>{mark.marks}</td>
+                            <td style={{ padding: '0.5rem', fontWeight: '600' }}>{mark.subject}</td>
+                            <td style={{ padding: '0.5rem' }}><span className="badge badge-info">{mark.marks}</span></td>
                             <td style={{ padding: '0.5rem' }}>
-                              <span className="badge" style={{
-                                fontSize: '0.7rem',
-                                padding: '0.15rem 0.4rem',
-                                background: mark.status === 'Pass' ? '#dcfce7' : '#fee2e2',
-                                color: mark.status === 'Pass' ? '#15803d' : '#b91c1c',
-                                borderRadius: '4px',
-                                fontWeight: 'bold'
-                              }}>
+                              <span className={`badge ${mark.status === 'Pass' ? 'badge-success' : 'badge-error'}`}>
                                 {mark.status}
                               </span>
                             </td>

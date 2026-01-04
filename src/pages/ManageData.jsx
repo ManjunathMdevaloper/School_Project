@@ -299,13 +299,13 @@ const ManageData = () => {
                                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Total Working Days</div>
                                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{attendanceStats.totalDays}</div>
                                             </div>
-                                            <div className="stat-box" style={{ background: '#dcfce7', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.9rem', color: '#15803d' }}>Present</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803d' }}>{attendanceStats.presentDays}</div>
+                                            <div className="stat-box" style={{ background: 'var(--success-bg)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', border: '1px solid var(--success-text)' }}>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--success-text)', fontWeight: '700' }}>Present</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success-text)' }}>{attendanceStats.presentDays}</div>
                                             </div>
-                                            <div className="stat-box" style={{ background: '#fee2e2', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.9rem', color: '#b91c1c' }}>Absent</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#b91c1c' }}>{attendanceStats.absentDays}</div>
+                                            <div className="stat-box" style={{ background: 'var(--error-bg)', padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', border: '1px solid var(--error-text)' }}>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--error-text)', fontWeight: '700' }}>Absent</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--error-text)' }}>{attendanceStats.absentDays}</div>
                                             </div>
                                         </div>
 
@@ -333,12 +333,10 @@ const ManageData = () => {
                                                             <tr key={index}>
                                                                 <td style={{ padding: '0.5rem' }}>{record.date}</td>
                                                                 <td style={{ padding: '0.5rem' }}>
-                                                                    <span className={`badge ${record.status === 'Present' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                                                    <span className={`badge ${record.status === 'Present' ? 'badge-success' : 'badge-error'}`}
                                                                         style={{
-                                                                            backgroundColor: record.status === 'Present' ? '#dcfce7' : '#fee2e2',
-                                                                            color: record.status === 'Present' ? '#15803d' : '#b91c1c',
-                                                                            padding: '0.15rem 0.4rem',
-                                                                            borderRadius: '0.25rem',
+                                                                            padding: '0.25rem 0.6rem',
+                                                                            borderRadius: '0.5rem',
                                                                             fontSize: '0.7rem'
                                                                         }}>
                                                                         {record.status}
@@ -352,8 +350,8 @@ const ManageData = () => {
                                                             <tr key={index}>
                                                                 <td style={{ padding: '0.5rem' }}>{new Date(monthRecord.month + '-01').toLocaleString('default', { month: 'short', year: 'numeric' })}</td>
                                                                 <td style={{ padding: '0.5rem' }}>{monthRecord.total}</td>
-                                                                <td style={{ padding: '0.5rem', color: '#15803d', fontWeight: 'bold' }}>{monthRecord.present}</td>
-                                                                <td style={{ padding: '0.5rem', color: '#b91c1c', fontWeight: 'bold' }}>{monthRecord.absent}</td>
+                                                                <td style={{ padding: '0.5rem', color: 'var(--success-text)', fontWeight: 'bold' }}>{monthRecord.present}</td>
+                                                                <td style={{ padding: '0.5rem', color: 'var(--error-text)', fontWeight: 'bold' }}>{monthRecord.absent}</td>
                                                             </tr>
                                                         ))
                                                     )}
@@ -396,17 +394,15 @@ const ManageData = () => {
                                                         <td style={{ padding: '0.5rem' }}>
                                                             <span style={{
                                                                 fontWeight: 'bold',
-                                                                color: mark.marks >= 35 ? '#15803d' : '#b91c1c'
+                                                                color: mark.marks >= 35 ? 'var(--success-text)' : 'var(--error-text)'
                                                             }}>
                                                                 {mark.marks}
                                                             </span>
                                                         </td>
                                                         <td style={{ padding: '0.5rem' }}>
-                                                            <span className="badge" style={{
+                                                            <span className={`badge ${mark.status === 'Pass' ? 'badge-success' : 'badge-error'}`} style={{
                                                                 fontSize: '0.7rem',
-                                                                padding: '0.15rem 0.4rem',
-                                                                background: mark.status === 'Pass' ? '#dcfce7' : '#fee2e2',
-                                                                color: mark.status === 'Pass' ? '#15803d' : '#b91c1c',
+                                                                padding: '0.25rem 0.6rem',
                                                                 borderRadius: '4px',
                                                                 fontWeight: 'bold'
                                                             }}>

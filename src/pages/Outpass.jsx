@@ -161,14 +161,7 @@ const Outpass = () => {
                                                 <td style={{ padding: '0.5rem' }}>{op.timeOut} - {op.timeIn}</td>
                                                 <td style={{ padding: '0.5rem' }}>
                                                     <span
-                                                        className="badge"
-                                                        style={{
-                                                            fontSize: '0.7rem',
-                                                            padding: '0.15rem 0.4rem',
-                                                            backgroundColor: op.status === 'Approved' ? '#dcfce7' : op.status === 'Rejected' ? '#fee2e2' : '#fef3c7',
-                                                            color: op.status === 'Approved' ? '#15803d' : op.status === 'Rejected' ? '#b91c1c' : '#b45309',
-                                                            border: `1px solid ${op.status === 'Approved' ? '#86efac' : op.status === 'Rejected' ? '#fca5a5' : '#fcd34d'}`
-                                                        }}
+                                                        className={`badge ${op.status === 'Approved' ? 'badge-success' : op.status === 'Rejected' ? 'badge-error' : 'badge-warning'}`}
                                                     >
                                                         {op.status}
                                                     </span>

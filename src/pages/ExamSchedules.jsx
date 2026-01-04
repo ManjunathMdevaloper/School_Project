@@ -162,8 +162,8 @@ const ExamSchedules = () => {
                         </div>
 
                         {message && (
-                            <div className={`p-3 mb-4 rounded ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-                                style={{ padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', backgroundColor: message.includes('Error') ? '#fee2e2' : '#dcfce7', color: message.includes('Error') ? '#b91c1c' : '#15803d' }}>
+                            <div className={`p-3 mb-4 rounded ${message.includes('Error') ? 'badge-error' : 'badge-success'}`}
+                                style={{ padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', width: '100%', textAlign: 'center' }}>
                                 {message}
                             </div>
                         )}
@@ -234,9 +234,6 @@ const ExamSchedules = () => {
                                             style={{
                                                 fontSize: '0.8rem',
                                                 padding: '0.25rem 0.75rem',
-                                                backgroundColor: formData.classes.includes(cls) ? 'var(--primary-color)' : 'transparent',
-                                                color: formData.classes.includes(cls) ? 'white' : 'var(--text-primary)',
-                                                borderColor: 'var(--border-color)'
                                             }}
                                         >
                                             {cls}
@@ -296,9 +293,9 @@ const ExamSchedules = () => {
                                                     <td style={{ padding: '0.5rem' }}>
                                                         <button
                                                             type="button"
-                                                            className="text-red-500 hover:text-red-700"
+                                                            className="badge-danger"
                                                             onClick={() => removeSubject(index)}
-                                                            style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--error-text)' }}
                                                         >
                                                             &times;
                                                         </button>
@@ -324,21 +321,21 @@ const ExamSchedules = () => {
                                 <p className="text-secondary text-center">No exam schedules found.</p>
                             ) : (
                                 examSchedules.map(schedule => (
-                                    <div key={schedule.id} className="p-4 border rounded" style={{ border: '1px solid var(--border-color)', borderRadius: '0.5rem', background: 'var(--bg-secondary)' }}>
+                                    <div key={schedule.id} className="card p-4" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                                             <h3 style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{schedule.name}</h3>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.75rem' }}>
                                                 <button
                                                     onClick={() => handleEdit(schedule)}
-                                                    className="text-blue-500"
-                                                    style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+                                                    className="btn btn-sm btn-outline"
+                                                    style={{ borderStyle: 'none', color: 'var(--accent-color)' }}
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => deleteExamSchedule(schedule.id)}
-                                                    className="text-red-500"
-                                                    style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+                                                    className="btn btn-sm btn-outline btn-danger"
+                                                    style={{ borderStyle: 'none' }}
                                                 >
                                                     Delete
                                                 </button>

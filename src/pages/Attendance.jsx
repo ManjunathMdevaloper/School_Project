@@ -26,9 +26,9 @@ const Attendance = () => {
         newRecord.intimation = false;
         newRecord.intimatedBy = '';
         newRecord.reason = '';
-        setPopup({ message: 'Presented', color: '#15803d' });
+        setPopup({ message: 'Presented', color: 'var(--success-bg)', textColor: 'var(--success-text)' });
       } else {
-        setPopup({ message: 'Absent', color: '#b91c1c' });
+        setPopup({ message: 'Absent', color: 'var(--error-bg)', textColor: 'var(--error-text)' });
       }
       setTimeout(() => setPopup(null), 1500);
     }
@@ -58,12 +58,13 @@ const Attendance = () => {
           left: '50%',
           transform: 'translateX(-50%)',
           backgroundColor: popup.color,
-          color: 'white',
+          color: popup.textColor || 'white',
           padding: '0.75rem 1.5rem',
-          borderRadius: '0.5rem',
+          borderRadius: '2rem',
           zIndex: 2000,
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           fontWeight: 'bold',
+          border: `1px solid ${popup.textColor || 'transparent'}`,
           animation: 'slideDown 0.3s ease-out'
         }}>
           {popup.message}
@@ -77,7 +78,7 @@ const Attendance = () => {
             <p className="text-secondary">Mark and manage daily student presence records.</p>
           </div>
           {saveStatus === 'saved' && (
-            <span style={{ background: '#dcfce7', color: '#15803d', padding: '0.5rem 1.5rem', borderRadius: '2rem', fontSize: '0.9rem', fontWeight: 'bold', border: '1px solid #15803d' }}>
+            <span style={{ background: 'var(--success-bg)', color: 'var(--success-text)', padding: '0.5rem 1.5rem', borderRadius: '2rem', fontSize: '0.9rem', fontWeight: 'bold', border: '1px solid var(--success-text)' }}>
               ✓ CHANGES SAVED
             </span>
           )}
@@ -103,8 +104,8 @@ const Attendance = () => {
           />
         </div>
 
-        <div className="card table-container" style={{ overflow: 'visible' }}>
-          <table className="table">
+        <div className="card table-container">
+          <table className="table table-wide">
             <thead>
               <tr>
                 <th>Admission No</th>
@@ -133,14 +134,13 @@ const Attendance = () => {
                         <button
                           className={`btn btn-sm ${record.present ? 'btn-primary' : 'btn-outline'}`}
                           onClick={() => handleAttendanceChange(student.admissionNo, 'present', true)}
-                          style={record.present ? { background: 'var(--primary-color)', color: 'white' } : {}}
                         >
                           Present
                         </button>
                         <button
                           className={`btn btn-sm ${!record.present ? 'btn-danger' : 'btn-outline'}`}
                           onClick={() => handleAttendanceChange(student.admissionNo, 'present', false)}
-                          style={!record.present ? { background: '#ef4444', color: 'white', borderColor: '#ef4444' } : { color: '#ef4444', borderColor: '#ef4444' }}
+                          style={!record.present ? { background: 'var(--error-bg)', color: 'var(--error-text)', borderColor: 'var(--error-text)' } : { color: 'var(--error-text)', borderColor: 'var(--error-text)' }}
                         >
                           Absent
                         </button>
@@ -166,7 +166,7 @@ const Attendance = () => {
                         </label>
 
                         {record.intimation && (
-                          <div className="mt-2 p-3 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div className="mt-2 p-3 rounded" style={{ backgroundColor: 'rgba(150,150,150,0.1)', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <CustomSelect
                               containerClass="compact-select"
                               value={record.intimatedBy || ''}

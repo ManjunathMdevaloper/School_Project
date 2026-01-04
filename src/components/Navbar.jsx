@@ -310,43 +310,46 @@ const Navbar = () => {
           position: absolute;
           top: 100%;
           right: 0;
-          width: 300px;
+          width: 350px;
           background: var(--glass-bg);
-          backdrop-filter: blur(20px);
+          backdrop-filter: blur(30px);
+          -webkit-backdrop-filter: blur(30px);
           border: 1px solid var(--glass-border);
-          border-radius: var(--radius-md);
-          box-shadow: var(--glass-shadow);
-          padding: 1.25rem;
-          margin-top: 10px;
+          border-radius: var(--radius-lg);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          padding: 1.5rem;
+          margin-top: 12px;
           z-index: 101;
+          animation: modalScaleUp 0.3s var(--ease-out-expo);
         }
 
         .notif-title { font-family: var(--font-serif); margin: 0 0 1rem 0; color: var(--primary-color); }
         .notif-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        .notif-item { background: rgba(0,0,0,0.02); padding: 0.75rem; border-radius: var(--radius-sm); }
-        .dark .notif-item { background: rgba(255,255,255,0.02); }
-        .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
-        .notif-name { font-weight: 700; font-size: 0.9rem; margin: 0; }
-        .notif-class { font-size: 0.7rem; background: var(--secondary-color); color: white; padding: 2px 6px; border-radius: 4px; }
-        .notif-reason { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
-        .notif-actions { display: flex; gap: 0.5rem; }
-        .notif-btn { flex: 1; border: none; padding: 0.4rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
-        .notif-btn-approve { background: #10b981; color: white; }
-        .notif-btn-reject { background: #ef4444; color: white; }
+        .notif-item { background: rgba(150,150,150,0.1); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border); }
+        .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .notif-name { font-weight: 700; font-size: 0.95rem; margin: 0; color: var(--text-primary); }
+        .notif-class { font-size: 0.75rem; font-weight: 700; background: var(--secondary-color); color: white; padding: 2px 8px; border-radius: 4px; }
+        .notif-reason { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4; }
+        .notif-actions { display: flex; gap: 0.75rem; }
+        .notif-btn { flex: 1; border: 1px solid transparent; padding: 0.6rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .notif-btn-approve { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
+        .notif-btn-approve:hover { background: var(--success-text); color: white; }
+        .notif-btn-reject { background: var(--error-bg); color: var(--error-text); border-color: var(--error-text); }
+        .notif-btn-reject:hover { background: var(--error-text); color: white; }
 
         .btn-logout {
-          background: transparent;
-          border: 1px solid #ef4444;
-          color: #ef4444;
-          padding: 0.5rem 1rem;
+          background: var(--error-bg);
+          border: 1px solid var(--error-text);
+          color: var(--error-text);
+          padding: 0.6rem 1.25rem;
           border-radius: var(--radius-sm);
-          font-weight: 600;
+          font-weight: 700;
           font-size: 0.85rem;
           cursor: pointer;
           transition: all 0.3s;
         }
 
-        .btn-logout:hover { background: #ef4444; color: white; }
+        .btn-logout:hover { background: var(--error-text); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
 
         /* Mobile */
         .mobile-only { display: none; align-items: center; gap: 1rem; }

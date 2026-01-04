@@ -65,7 +65,6 @@ const AppContent = () => {
         .main-content {
           flex: 1;
           position: relative;
-          z-index: 1;
         }
       `}</style>
     </div>
