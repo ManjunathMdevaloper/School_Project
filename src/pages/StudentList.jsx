@@ -8,7 +8,9 @@ const StudentList = () => {
   const { students, addStudent, addStudentsBulk, deleteStudent } = useStudents();
   const { userRole } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isManualClass, setIsManualClass] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
   const [filterClass, setFilterClass] = useState('');
   const fileInputRef = useRef(null);
 
@@ -42,12 +44,16 @@ const StudentList = () => {
     a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
   );
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      const newId = addStudent(formData);
+      const admissionNo = await addStudent(formData);
       setIsModalOpen(false);
-      setMessage(`Student added successfully! Admission No: ${newId}`);
+      setIsManualClass(false);
+      setMessage(`Student added successfully! Admission No: ${admissionNo}`);
       setTimeout(() => setMessage(''), 5000);
       setFormData({
         firstName: '',
@@ -61,8 +67,11 @@ const StudentList = () => {
     } catch (error) {
       console.error("Failed to add student:", error);
       setMessage(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
 
   const handleBulkUpload = (e) => {
     const file = e.target.files[0];
@@ -247,8 +256,12 @@ const StudentList = () => {
           <div className="modal">
             <div className="modal-header">
               <h2 className="modal-title">Add New Student</h2>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
+              <button className="close-btn" onClick={() => {
+                setIsModalOpen(false);
+                setIsManualClass(false);
+              }}>&times;</button>
             </div>
+
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-2" style={{ gap: '1rem' }}>
                 <div className="form-group">
@@ -260,24 +273,58 @@ const StudentList = () => {
                   <input required name="lastName" value={formData.lastName} onChange={handleInputChange} className="form-control" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Class</label>
-                  <select required name="class" value={formData.class} onChange={handleInputChange} className="form-control">
-                    <option value="">Select Class</option>
-                    {classes.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                    <option value="New Class">New Class (Type Manually)</option>
-                  </select>
-                  {formData.class === 'New Class' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label className="form-label" style={{ marginBottom: 0 }}>Class</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsManualClass(!isManualClass);
+                        setFormData(prev => ({ ...prev, class: '' }));
+                      }}
+                      style={{
+                        fontSize: '0.7rem',
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary-color)',
+                        textDecoration: 'underline',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isManualClass ? 'Switch to Select' : 'Type Manually'}
+                    </button>
+                  </div>
+
+                  {!isManualClass ? (
+                    <select
+                      required
+                      name="class"
+                      value={formData.class}
+                      onChange={handleInputChange}
+                      className="form-control"
+                    >
+                      <option value="">Select Class</option>
+                      {/* Show existing classes from DB */}
+                      {classes.length > 0 && classes.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                      {/* Fallback default classes if none in DB */}
+                      {classes.length === 0 && Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`).map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  ) : (
                     <input
+                      required
                       type="text"
-                      placeholder="Enter Class Name"
-                      className="form-control mt-2"
-                      style={{ marginTop: '0.5rem' }}
-                      onChange={(e) => setFormData(prev => ({ ...prev, class: e.target.value }))}
+                      name="class"
+                      placeholder="e.g. 10th Grade"
+                      value={formData.class}
+                      onChange={handleInputChange}
+                      className="form-control"
                     />
                   )}
                 </div>
+
                 <div className="form-group">
                   <label className="form-label">Roll No</label>
                   <input required type="text" name="rollNo" value={formData.rollNo} onChange={handleInputChange} className="form-control" />
@@ -296,7 +343,15 @@ const StudentList = () => {
                 <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="form-control" />
               </div>
               <div className="text-center mt-4" style={{ marginTop: '1.5rem' }}>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Create Student</button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: '100%' }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Adding...' : 'Create Student'}
+                </button>
+
               </div>
             </form>
           </div>

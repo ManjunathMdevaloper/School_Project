@@ -8,8 +8,9 @@ const Attendance = () => {
   const [saveStatus, setSaveStatus] = useState(''); // 'saving', 'saved', ''
   const [popup, setPopup] = useState(null); // { message: '', color: '' }
 
-  const handleAttendanceChange = (admissionNo, field, value) => {
+  const handleAttendanceChange = async (admissionNo, field, value) => {
     setSaveStatus('saving');
+
     const currentRecord = attendance[selectedDate]?.[admissionNo] || {
       present: true,
       intimation: false,
@@ -33,7 +34,8 @@ const Attendance = () => {
       setTimeout(() => setPopup(null), 1500);
     }
 
-    setAttendanceForDate(selectedDate, admissionNo, newRecord);
+    await setAttendanceForDate(selectedDate, admissionNo, newRecord);
+
 
     // Simulate save delay for visual feedback
     setTimeout(() => {

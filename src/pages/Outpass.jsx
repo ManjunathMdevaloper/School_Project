@@ -21,7 +21,7 @@ const Outpass = () => {
     // Get unique classes
     const classes = [...new Set(students.map(s => s.class))].sort();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.admissionNo) {
             setMessage('Please select a student');
@@ -29,13 +29,14 @@ const Outpass = () => {
         }
 
         const student = students.find(s => s.admissionNo === formData.admissionNo);
-        addOutpass({
+        await addOutpass({
             ...formData,
             studentName: `${student.firstName} ${student.lastName}`,
             class: student.class
         });
 
         setMessage('Outpass request submitted successfully!');
+
         setFormData({
             admissionNo: '',
             reason: '',

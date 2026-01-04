@@ -3,10 +3,19 @@ import * as XLSX from 'xlsx';
 import { useStudents } from '../context/StudentContext';
 
 const Marks = () => {
-  const { students, updateMarks, importMarksFromArray, attendance, examSchedules } = useStudents();
+  const {
+    students,
+    updateMarks,
+    importMarksFromArray,
+    attendance,
+    examSchedules,
+    lastImport,
+    undoLastImport
+  } = useStudents();
   const [activeTab, setActiveTab] = useState('single'); // single or import
 
   // Single Entry State
+  // ... (existing state)
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState('');
@@ -18,7 +27,17 @@ const Marks = () => {
   const [remarks, setRemarks] = useState('');
   const [message, setMessage] = useState('');
 
-  // Import State
+  const handleUndo = async () => {
+    if (window.confirm('Are you sure you want to undo the last import? This will remove all marks added in that session.')) {
+      const count = await undoLastImport();
+      setMessage(`Successfully reverted ${count} records.`);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  // ... (rest of the file remains similar)
+
+  // Filter students based on selected class
   const [importData, setImportData] = useState('');
 
   // Filter students based on selected class
@@ -57,7 +76,8 @@ const Marks = () => {
     }
   }, [examDate]);
 
-  const handleSingleSubmit = (e) => {
+  const handleSingleSubmit = async (e) => {
+
     e.preventDefault();
     if (!selectedStudent || !subject) {
       setMessage('Please select student and subject');
@@ -69,12 +89,13 @@ const Marks = () => {
       return;
     }
 
-    updateMarks(selectedStudent, selectedMonth, subject, {
+    await updateMarks(selectedStudent, selectedMonth, subject, {
       marks: Number(marks),
       status,
       remarks,
       date: examDate
     });
+
 
     setMessage('Marks updated successfully!');
     setTimeout(() => setMessage(''), 3000);
@@ -101,29 +122,38 @@ const Marks = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
+
       try {
         const bstr = evt.target.result;
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws);
+        console.log('Total students in context:', students.length);
+        console.log('Sample student from context:', students[0]);
+        console.log('Excel Data Sample (first row):', data[0]);
 
-        // Normalize keys to lowercase to be safe, then map to our format
-        const formattedData = data.map(row => {
-          // Helper to find key case-insensitively
-          const getKey = (key) => Object.keys(row).find(k => k.toLowerCase() === key.toLowerCase());
+        let successCount = 0;
+        let failCount = 0;
+        const failedRows = [];
 
-          const marksKey = getKey('marks') || getKey('mark');
+        const formattedData = data.map((row, index) => {
+          // Helper to find key case-insensitively and handle spaces
+          const getKey = (key) => Object.keys(row).find(k => k.toLowerCase().replace(/\s/g, '') === key.toLowerCase().replace(/\s/g, ''));
+
+          const marksKey = getKey('marks') || getKey('mark') || getKey('obtainedmarks');
           const marksVal = marksKey ? row[marksKey] : undefined;
 
-          // Find student by Admission No OR (Class + Roll No/Name)
-          let admissionNo = row[getKey('admissionNo')] || row[getKey('admission no')] || row[getKey('id')];
+          const subjectKey = getKey('subject') || getKey('subjectname');
+          const subjectVal = subjectKey ? row[subjectKey] : undefined;
+
+          let admissionNo = row[getKey('admissionNo')] || row[getKey('admissionno')] || row[getKey('id')];
 
           if (!admissionNo) {
-            const className = row[getKey('class')];
-            const rollNo = row[getKey('rollno')] || row[getKey('roll no')];
-            const name = row[getKey('name')] || row[getKey('student name')] || row[getKey('student')];
+            const className = row[getKey('class')] || row[getKey('grade')];
+            const rollNo = row[getKey('rollno')] || row[getKey('rollno')];
+            const name = row[getKey('name')] || row[getKey('studentname')] || row[getKey('student')];
 
             if (className) {
               const cleanClass = String(className).trim().toLowerCase();
@@ -133,38 +163,62 @@ const Marks = () => {
                 const cleanRoll = String(rollNo).trim().toLowerCase();
                 const found = students.find(s =>
                   s.class.toLowerCase() === cleanClass &&
-                  String(s.rollNo).toLowerCase() === cleanRoll
+                  String(s.rollNo).trim().toLowerCase() === cleanRoll
                 );
                 if (found) admissionNo = found.admissionNo;
               }
 
-              // Try Name if no admissionNo yet
+              // Try Name if no admissionNo yet OR if roll matching failed
               if (!admissionNo && name) {
                 const cleanName = String(name).trim().toLowerCase();
-                const found = students.find(s =>
-                  s.class.toLowerCase() === cleanClass &&
-                  (`${s.firstName} ${s.lastName}`).toLowerCase() === cleanName
-                );
+                const found = students.find(s => {
+                  const sName = `${s.firstName} ${s.lastName}`.toLowerCase().trim();
+                  return s.class.toLowerCase() === cleanClass && (
+                    sName === cleanName ||
+                    sName.includes(cleanName) ||
+                    cleanName.includes(sName)
+                  );
+                });
                 if (found) admissionNo = found.admissionNo;
               }
             }
           }
 
-          return {
-            admissionNo,
-            subject: row[getKey('subject')],
-            marks: marksVal !== undefined ? marksVal : '',
-            status: row[getKey('status')] || (marksVal !== undefined ? (Number(marksVal) >= 35 ? 'Pass' : 'Fail') : 'Pass'),
-            remarks: row[getKey('remarks')] || ''
-          };
-        }).filter(item => item.admissionNo && item.subject && item.marks !== ''); // Filter out invalid rows
+          const isValid = admissionNo && subjectVal && marksVal !== undefined && marksVal !== '';
+
+          if (isValid) {
+            successCount++;
+            return {
+              admissionNo,
+              subject: subjectVal,
+              marks: marksVal,
+              status: row[getKey('status')] || (Number(marksVal) >= 35 ? 'Pass' : 'Fail'),
+              remarks: row[getKey('remarks')] || ''
+            };
+          } else {
+            failCount++;
+            failedRows.push({
+              row: index + 2, // 1-indexed + header
+              name: row[getKey('name')] || row[getKey('studentname')] || 'Unknown',
+              class: row[getKey('class')] || 'Unknown',
+              reason: !admissionNo ? 'Student not found (check Class/Roll No)' : (!subjectVal ? 'Missing Subject' : 'Missing Marks')
+            });
+            return null;
+          }
+        }).filter(Boolean);
 
         if (formattedData.length === 0) {
-          throw new Error('No valid data found. Please ensure columns include: Class & Roll No (or Name), Subject, Marks.');
+          throw new Error('No valid data found. Check column headers: Class, Roll No (or Name), Subject, Marks.');
         }
 
-        importMarksFromArray(formattedData, selectedMonth);
-        setMessage(`Successfully imported ${formattedData.length} records from Excel.`);
+        await importMarksFromArray(formattedData, selectedMonth);
+
+        let finalMsg = `Successfully imported ${successCount} records from Excel.`;
+        if (failCount > 0) {
+          finalMsg += ` ${failCount} records failed (Check console for details).`;
+          console.warn('Failed Import Rows:', failedRows);
+        }
+        setMessage(finalMsg);
       } catch (err) {
         setMessage('Error parsing Excel file: ' + err.message);
       }
@@ -191,6 +245,16 @@ const Marks = () => {
             >
               Bulk Import
             </button>
+
+            {lastImport && lastImport.records.length > 0 && (
+              <button
+                className="btn btn-outline"
+                style={{ marginLeft: 'auto', borderColor: '#ef4444', color: '#ef4444' }}
+                onClick={handleUndo}
+              >
+                Undo Last Import
+              </button>
+            )}
           </div>
 
           {message && (

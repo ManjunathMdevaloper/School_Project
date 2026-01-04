@@ -1,5 +1,19 @@
 // src/context/StudentContext.jsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { db } from '../firebase';
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+  deleteField
+} from 'firebase/firestore';
 import studentsData from '../data/students.json';
 
 const StudentContext = createContext();
@@ -9,44 +23,99 @@ export function useStudents() {
 }
 
 export function StudentProvider({ children }) {
-  const STORAGE_KEY = 'sri_sudha_students_v2';
+  const [students, setStudents] = useState([]);
+  const [marks, setMarks] = useState({});
+  const [attendance, setAttendance] = useState({});
+  const [outpasses, setOutpasses] = useState([]);
+  const [examSchedules, setExamSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lastImport, setLastImport] = useState(null); // { records: [{admissionNo, month, subject}] }
 
-  const [students, setStudents] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-    return studentsData;
-  });
-
-  const [marks, setMarks] = useState(() => {
-    const saved = localStorage.getItem('sri_sudha_marks_v1');
-    return saved ? JSON.parse(saved) : {};
-  });
-
-  const [attendance, setAttendance] = useState(() => {
-    const saved = localStorage.getItem('sri_sudha_attendance_v1');
-    return saved ? JSON.parse(saved) : {};
-  });
-
-  const [outpasses, setOutpasses] = useState(() => {
-    const saved = localStorage.getItem('sri_sudha_outpasses_v1');
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  // ... (rest of the listeners)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-  }, [students]);
+    const unsub = onSnapshot(collection(db, 'students'),
+      (snapshot) => {
+        const data = snapshot.docs.map(doc => doc.data());
+        if (data.length === 0 && loading) {
+          seedInitialData();
+        } else {
+          setStudents(data);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Firestore Students Error:", error);
+        setLoading(false); // Stop loading even on error
+      });
+    return () => unsub();
+  }, [loading]);
 
+  // 2. Listen for Marks
   useEffect(() => {
-    localStorage.setItem('sri_sudha_marks_v1', JSON.stringify(marks));
-  }, [marks]);
+    const unsub = onSnapshot(collection(db, 'marks'),
+      (snapshot) => {
+        const marksObj = {};
+        snapshot.docs.forEach(doc => {
+          marksObj[doc.id] = doc.data();
+        });
+        setMarks(marksObj);
+      },
+      (error) => console.error("Firestore Marks Error:", error));
+    return () => unsub();
+  }, []);
 
+  // 3. Listen for Attendance
   useEffect(() => {
-    localStorage.setItem('sri_sudha_attendance_v1', JSON.stringify(attendance));
-  }, [attendance]);
+    const unsub = onSnapshot(collection(db, 'attendance'),
+      (snapshot) => {
+        const attObj = {};
+        snapshot.docs.forEach(doc => {
+          attObj[doc.id] = doc.data();
+        });
+        setAttendance(attObj);
+      },
+      (error) => console.error("Firestore Attendance Error:", error));
+    return () => unsub();
+  }, []);
 
+  // 4. Listen for Outpasses
   useEffect(() => {
-    localStorage.setItem('sri_sudha_outpasses_v1', JSON.stringify(outpasses));
-  }, [outpasses]);
+    const unsub = onSnapshot(collection(db, 'outpasses'),
+      (snapshot) => {
+        const data = snapshot.docs.map(doc => doc.data());
+        setOutpasses(data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+      },
+      (error) => console.error("Firestore Outpasses Error:", error));
+    return () => unsub();
+  }, []);
+
+  // 5. Listen for Exam Schedules
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'examSchedules'),
+      (snapshot) => {
+        const data = snapshot.docs.map(doc => doc.data());
+        setExamSchedules(data);
+      },
+      (error) => console.error("Firestore Schedules Error:", error));
+    return () => unsub();
+  }, []);
+
+
+  async function seedInitialData() {
+    try {
+      console.log("Seeding initial data to Firestore...");
+      const batch = writeBatch(db);
+      studentsData.forEach(s => {
+        const ref = doc(db, 'students', s.admissionNo);
+        batch.set(ref, s);
+      });
+      await batch.commit();
+      console.log("Seeding complete!");
+    } catch (err) {
+      console.error("Seeding failed. This is likely due to Firestore Rules or a missing 'students' collection.", err);
+    }
+  }
+
 
   function generateAdmissionNo() {
     const year = new Date().getFullYear();
@@ -65,18 +134,17 @@ export function StudentProvider({ children }) {
     return `${year}-${pad}`;
   }
 
-  function addStudent(studentObj) {
+  async function addStudent(studentObj) {
     const admissionNo = generateAdmissionNo();
     const newStudent = { admissionNo, ...studentObj };
-    setStudents(prev => [...prev, newStudent]);
+    await setDoc(doc(db, 'students', admissionNo), newStudent);
     return admissionNo;
   }
 
-  function addStudentsBulk(studentsArray) {
+  async function addStudentsBulk(studentsArray) {
     const year = new Date().getFullYear();
     let maxSeq = 0;
 
-    // Find current max sequence
     students.forEach(s => {
       if (s.admissionNo && s.admissionNo.startsWith(`${year}-`)) {
         const parts = s.admissionNo.split('-');
@@ -87,105 +155,162 @@ export function StudentProvider({ children }) {
       }
     });
 
-    const newStudents = studentsArray.map((s, index) => {
+    const batch = writeBatch(db);
+    studentsArray.forEach((s, index) => {
       const next = maxSeq + 1 + index;
       const pad = String(next).padStart(3, '0');
       const admissionNo = `${year}-${pad}`;
-      return { admissionNo, ...s };
+      const newStudent = { admissionNo, ...s };
+      const ref = doc(db, 'students', admissionNo);
+      batch.set(ref, newStudent);
     });
 
-    setStudents(prev => [...prev, ...newStudents]);
-    return newStudents.length;
+    await batch.commit();
+    return studentsArray.length;
   }
 
-  function updateStudent(admissionNo, updates) {
-    setStudents(prev => prev.map(s => s.admissionNo === admissionNo ? { ...s, ...updates } : s));
+  async function updateStudent(admissionNo, updates) {
+    await updateDoc(doc(db, 'students', admissionNo), updates);
   }
 
-  function updateMarks(admissionNo, month, subject, markObj) {
-    setMarks(prev => {
-      const copy = { ...prev };
-      if (!copy[admissionNo]) copy[admissionNo] = {};
-      if (!copy[admissionNo][month]) copy[admissionNo][month] = {};
-
-      copy[admissionNo][month][subject] = markObj; // { marks, status, remarks }
-      return copy;
+  async function updateMarks(admissionNo, month, subject, markObj) {
+    const ref = doc(db, 'marks', admissionNo);
+    // Use dot notation to update nested fields without overwriting the whole month object
+    await updateDoc(ref, {
+      [`${month}.${subject}`]: markObj
+    }).catch(async (error) => {
+      // If document doesn't exist, create it
+      if (error.code === 'not-found') {
+        await setDoc(ref, { [month]: { [subject]: markObj } });
+      }
     });
   }
 
-  function importMarksFromArray(rows, selectedMonth) {
-    const copy = { ...marks };
+  async function importMarksFromArray(rows, selectedMonth) {
+    const groupedByStudent = {};
+    const importStats = [];
+
     rows.forEach(r => {
-      if (!copy[r.admissionNo]) copy[r.admissionNo] = {};
-
-      // Use selectedMonth if provided, otherwise try to find it in row, or default to current month
       const month = selectedMonth || r.month || new Date().toISOString().slice(0, 7);
+      if (!groupedByStudent[r.admissionNo]) groupedByStudent[r.admissionNo] = {};
 
-      if (!copy[r.admissionNo][month]) copy[r.admissionNo][month] = {};
-
-      copy[r.admissionNo][month][r.subject] = {
+      const updateKey = `${month}.${r.subject}`;
+      groupedByStudent[r.admissionNo][updateKey] = {
         marks: Number(r.marks),
-        status: r.status || 'present',
-        remarks: r.remarks || ''
+        status: r.status || (Number(r.marks) >= 35 ? 'Pass' : 'Fail'),
+        remarks: r.remarks || '',
+        date: r.date || new Date().toISOString().split('T')[0]
       };
+      importStats.push({ admissionNo: r.admissionNo, month, subject: r.subject });
     });
-    setMarks(copy);
+
+    const promises = Object.entries(groupedByStudent).map(async ([admissionNo, updates]) => {
+      const ref = doc(db, 'marks', admissionNo);
+      try {
+        await updateDoc(ref, updates);
+      } catch (error) {
+        if (error.code === 'not-found') {
+          const nestedData = {};
+          Object.entries(updates).forEach(([key, value]) => {
+            const [m, s] = key.split('.');
+            if (!nestedData[m]) nestedData[m] = {};
+            nestedData[m][s] = value;
+          });
+          await setDoc(ref, nestedData);
+        } else {
+          console.error(`Error updating marks for ${admissionNo}:`, error);
+        }
+      }
+    });
+
+    await Promise.all(promises);
+    setLastImport({ records: importStats });
   }
 
-  function setAttendanceForDate(dateISO, admissionNo, record) {
-    setAttendance(prev => {
-      const copy = { ...prev };
-      if (!copy[dateISO]) copy[dateISO] = {};
-      copy[dateISO][admissionNo] = record;
-      return copy;
+  async function undoLastImport() {
+    if (!lastImport || !lastImport.records.length) return 0;
+
+    const groupedByStudent = {};
+    lastImport.records.forEach(r => {
+      if (!groupedByStudent[r.admissionNo]) groupedByStudent[r.admissionNo] = {};
+      groupedByStudent[r.admissionNo][`${r.month}.${r.subject}`] = deleteField();
+    });
+
+    const promises = Object.entries(groupedByStudent).map(async ([admissionNo, updates]) => {
+      const ref = doc(db, 'marks', admissionNo);
+      await updateDoc(ref, updates).catch(err => console.error("Undo failed for", admissionNo, err));
+    });
+
+    await Promise.all(promises);
+    const count = lastImport.records.length;
+    setLastImport(null);
+    return count;
+  }
+
+  async function setAttendanceForDate(dateISO, admissionNo, record) {
+    const ref = doc(db, 'attendance', dateISO);
+    await updateDoc(ref, {
+      [admissionNo]: record
+    }).catch(async (error) => {
+      if (error.code === 'not-found') {
+        await setDoc(ref, { [admissionNo]: record });
+      }
     });
   }
 
-  function addOutpass(outpassObj) {
+
+  async function addOutpass(outpassObj) {
     const id = Date.now().toString();
     const newOutpass = { id, status: 'Pending', timestamp: new Date().toISOString(), ...outpassObj };
-    setOutpasses(prev => [newOutpass, ...prev]);
+    await setDoc(doc(db, 'outpasses', id), newOutpass);
     return id;
   }
 
-  function updateOutpassStatus(id, newStatus) {
-    setOutpasses(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+  async function updateOutpassStatus(id, newStatus) {
+    await updateDoc(doc(db, 'outpasses', id), { status: newStatus });
   }
 
-  const [examSchedules, setExamSchedules] = useState(() => {
-    const saved = localStorage.getItem('sri_sudha_exam_schedules_v1');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('sri_sudha_exam_schedules_v1', JSON.stringify(examSchedules));
-  }, [examSchedules]);
-
-  function addExamSchedule(scheduleObj) {
+  async function addExamSchedule(scheduleObj) {
     const id = Date.now().toString();
     const newSchedule = { id, ...scheduleObj };
-    setExamSchedules(prev => [newSchedule, ...prev]);
+    await setDoc(doc(db, 'examSchedules', id), newSchedule);
     return id;
   }
 
-  function deleteExamSchedule(id) {
-    setExamSchedules(prev => prev.filter(s => s.id !== id));
+  async function deleteExamSchedule(id) {
+    await deleteDoc(doc(db, 'examSchedules', id));
   }
 
-  function updateExamSchedule(id, updates) {
-    setExamSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  async function updateExamSchedule(id, updates) {
+    await updateDoc(doc(db, 'examSchedules', id), updates);
   }
 
-  function deleteStudent(admissionNo) {
-    setStudents(prev => prev.filter(s => s.admissionNo !== admissionNo));
+  async function deleteStudent(admissionNo) {
+    await deleteDoc(doc(db, 'students', admissionNo));
   }
 
-  function deleteStudentsBulk(admissionNos) {
-    setStudents(prev => prev.filter(s => !admissionNos.includes(s.admissionNo)));
+  async function deleteStudentsBulk(admissionNos) {
+    const batch = writeBatch(db);
+    admissionNos.forEach(id => {
+      batch.delete(doc(db, 'students', id));
+    });
+    await batch.commit();
+  }
+
+  async function forceSyncWithJSON() {
+    const batch = writeBatch(db);
+    studentsData.forEach(s => {
+      const ref = doc(db, 'students', s.admissionNo);
+      batch.set(ref, s);
+    });
+    await batch.commit();
+    return true;
   }
 
   const value = {
     students,
+    loading,
+    forceSyncWithJSON,
     addStudent,
     addStudentsBulk,
     updateStudent,
@@ -195,6 +320,8 @@ export function StudentProvider({ children }) {
     marks,
     updateMarks,
     importMarksFromArray,
+    lastImport,
+    undoLastImport,
     attendance,
     setAttendanceForDate,
     outpasses,
@@ -208,3 +335,4 @@ export function StudentProvider({ children }) {
 
   return <StudentContext.Provider value={value}>{children}</StudentContext.Provider>;
 }
+

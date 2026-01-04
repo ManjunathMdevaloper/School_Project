@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const ManageData = () => {
-    const { students, attendance, marks } = useStudents();
+    const { students, attendance, marks, forceSyncWithJSON } = useStudents();
 
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
@@ -236,6 +236,7 @@ const ManageData = () => {
                 <h1 className="page-title mb-5" style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Manage Student Data</h1>
 
                 {/* Filters */}
+
                 <div className="card mb-5">
                     <div className="grid grid-cols-3" style={{ gap: '1.5rem' }}>
                         <div className="form-group">
@@ -444,6 +445,8 @@ const ManageData = () => {
                                 </button>
 
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flex: 1, minWidth: '300px' }}>
+
+
                                     <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
                                         <label className="form-label" style={{ fontSize: '0.9rem' }}>WhatsApp Number</label>
                                         <input
