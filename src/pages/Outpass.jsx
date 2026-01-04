@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStudents } from '../context/StudentContext';
+import CustomSelect from '../components/CustomSelect';
 
 const Outpass = () => {
     const { students, outpasses, addOutpass } = useStudents();
@@ -50,47 +51,35 @@ const Outpass = () => {
     return (
         <div className="page-container section">
             <div className="container">
-                <h1 className="page-title mb-5" style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Student Outpass Form</h1>
+                <div style={{ marginBottom: '3rem' }}>
+                    <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Campus Outpass</h1>
+                    <p className="text-secondary">Request and manage student temporary leave permissions.</p>
+                </div>
 
                 <div className="grid grid-cols-2" style={{ gap: '2rem' }}>
                     {/* Form Section */}
-                    <div className="card">
+                    <div className="card" style={{ overflow: 'visible' }}>
                         <h2 className="mb-4" style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 'bold' }}>New Request</h2>
                         {message && <div className="p-3 mb-4 bg-green-100 text-green-700 rounded" style={{ padding: '1rem', backgroundColor: '#dcfce7', color: '#15803d', borderRadius: '0.5rem', marginBottom: '1rem' }}>{message}</div>}
 
                         <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">Select Class</label>
-                                <select
-                                    className="form-control"
-                                    value={selectedClass}
-                                    onChange={(e) => {
-                                        setSelectedClass(e.target.value);
-                                        setFormData(prev => ({ ...prev, admissionNo: '' })); // Reset student
-                                    }}
-                                >
-                                    <option value="">-- All Classes --</option>
-                                    {classes.map(c => (
-                                        <option key={c} value={c}>{c}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <CustomSelect
+                                label="Select Class"
+                                value={selectedClass}
+                                onChange={(e) => {
+                                    setSelectedClass(e.target.value);
+                                    setFormData(prev => ({ ...prev, admissionNo: '' })); // Reset student
+                                }}
+                                options={[{ value: '', label: '-- All Classes --' }, ...classes.map(c => ({ value: c, label: c }))]}
+                            />
 
-                            <div className="form-group">
-                                <label className="form-label">Select Student</label>
-                                <select
-                                    className="form-control"
+                            <div className="mt-4">
+                                <CustomSelect
+                                    label="Select Student"
                                     value={formData.admissionNo}
                                     onChange={(e) => setFormData({ ...formData, admissionNo: e.target.value })}
-                                    required
-                                >
-                                    <option value="">-- Select Student --</option>
-                                    {filteredStudents.map(s => (
-                                        <option key={s.admissionNo} value={s.admissionNo}>
-                                            {s.firstName} {s.lastName} ({s.class})
-                                        </option>
-                                    ))}
-                                </select>
+                                    options={[{ value: '', label: '-- Select Student --' }, ...filteredStudents.map(s => ({ value: s.admissionNo, label: `${s.firstName} ${s.lastName} (${s.admissionNo})` }))]}
+                                />
                             </div>
 
                             <div className="form-group">
@@ -104,7 +93,7 @@ const Outpass = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2" style={{ gap: '1rem' }}>
+                            <div className="grid grid-cols-2" style={{ gap: '1rem', marginTop: '1.5rem' }}>
                                 <div className="form-group">
                                     <label className="form-label">Time Out</label>
                                     <input
@@ -127,7 +116,7 @@ const Outpass = () => {
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group mt-4">
                                 <label className="form-label">Reason</label>
                                 <textarea
                                     className="form-control"
@@ -139,7 +128,7 @@ const Outpass = () => {
                                 ></textarea>
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100" style={{ width: '100%' }}>Submit Request</button>
+                            <button type="submit" className="btn btn-primary w-100" style={{ width: '100%', marginTop: '1rem' }}>Submit Request</button>
                         </form>
                     </div>
 

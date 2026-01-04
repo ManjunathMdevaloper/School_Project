@@ -23,10 +23,12 @@ const About = () => {
                                 To be a leading institution that shapes global citizens who are innovative, compassionate, and capable of making a positive impact on the world.
                             </p>
                         </div>
-                        <div className="about-image card">
-                            <div className="placeholder-image">
-                                <span>School Building Image</span>
-                            </div>
+                        <div className="about-image">
+                            <img
+                                src="/school_building_exterior.png"
+                                alt="School Building"
+                                className="premium-image"
+                            />
                         </div>
                     </div>
                 </div>
@@ -74,15 +76,26 @@ const About = () => {
           line-height: 1.8;
           margin-bottom: 1.5rem;
         }
-        .placeholder-image {
+        .about-image {
+          position: relative;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 1.5rem;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          transition: transform 0.3s ease;
+        }
+        .about-image:hover {
+          transform: translateY(-10px);
+        }
+        .premium-image {
           width: 100%;
-          height: 300px;
-          background-color: var(--bg-accent);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 0.5rem;
-          color: var(--text-secondary);
+          height: auto;
+          border-radius: 1rem;
+          display: block;
+          object-fit: cover;
+          box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         .bg-secondary { background-color: var(--bg-secondary); }
         .mb-5 { margin-bottom: 3rem; }

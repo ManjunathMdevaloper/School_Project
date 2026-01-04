@@ -6,23 +6,36 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (login(username, password)) {
-      navigate('/');
-    } else {
-      setError('Invalid username or password');
-    }
+    setIsLoggingIn(true);
+
+    // Simulate a brief delay for a better animation feel
+    setTimeout(() => {
+      if (login(username, password)) {
+        navigate('/');
+      } else {
+        setIsLoggingIn(false);
+        setError('Invalid username or password');
+      }
+    }, 1500);
   };
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <h1 className="login-title">Login</h1>
-        <p className="login-subtitle">7Veda Management</p>
+      {isLoggingIn && (
+        <div className="loading-overlay">
+          <div className="loader"></div>
+          <div className="loading-text">AUTHENTICATING</div>
+        </div>
+      )}
+      <div className="login-card fade-in">
+        <h1 className="login-title">Welcome</h1>
+        <p className="login-subtitle">7Veda School Portal</p>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -62,30 +75,42 @@ const Login = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          min-height: 80vh;
-          background-color: var(--bg-primary);
+          min-height: 90vh;
+          background: transparent;
         }
         .login-card {
-          background: var(--bg-secondary);
-          padding: 2.5rem;
-          border-radius: 1rem;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          background: var(--glass-bg);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          padding: 3rem;
+          border-radius: var(--radius-lg);
+          box-shadow: var(--glass-shadow);
           width: 100%;
-          max-width: 400px;
-          border: 1px solid var(--border-color);
+          max-width: 450px;
+          border: 1px solid var(--glass-border);
+          transition: all 0.3s var(--ease-out-expo);
         }
+        
+        .login-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
         .login-title {
-          font-size: 1.5rem;
-          font-weight: bold;
+          font-family: var(--font-serif);
+          font-size: 2.5rem;
+          font-weight: 700;
           text-align: center;
-          margin-bottom: 0.5rem;
-          color: var(--text-primary);
+          margin-bottom: 0.25rem;
+          color: var(--primary-color);
         }
         .login-subtitle {
           text-align: center;
           color: var(--text-secondary);
-          margin-bottom: 2rem;
-          font-size: 0.875rem;
+          margin-bottom: 2.5rem;
+          font-size: 1rem;
+          font-weight: 500;
+          letter-spacing: 1px;
         }
         .form-group {
           margin-bottom: 1.5rem;
@@ -93,37 +118,55 @@ const Login = () => {
         .form-group label {
           display: block;
           margin-bottom: 0.5rem;
-          font-weight: 500;
+          font-weight: 600;
           color: var(--text-primary);
+          font-size: 0.9rem;
         }
         .form-control {
           width: 100%;
-          padding: 0.75rem;
-          border-radius: 0.5rem;
-          border: 1px solid var(--border-color);
-          background-color: var(--bg-primary);
+          padding: 0.9rem 1.2rem;
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(0,0,0,0.1);
+          background-color: rgba(255,255,255,0.05);
           color: var(--text-primary);
-          transition: border-color 0.2s;
+          transition: all 0.3s;
+          font-size: 1rem;
+        }
+        .dark .form-control {
+           border: 1px solid rgba(255,255,255,0.1);
         }
         .form-control:focus {
           outline: none;
-          border-color: var(--primary-color);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          border-color: var(--secondary-color);
+          background-color: rgba(255,255,255,0.1);
         }
         .btn-block {
           width: 100%;
-          padding: 0.75rem;
+          padding: 1rem;
           font-size: 1rem;
+          font-weight: 700;
           margin-top: 1rem;
+          background: var(--primary-color);
+          color: white;
+          border-radius: var(--radius-sm);
+          transition: all 0.3s;
+          cursor: pointer;
+        }
+        .dark .btn-block { color: #0F172A; }
+        .btn-block:hover {
+          opacity: 0.9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .error-message {
           background-color: #fee2e2;
           color: #b91c1c;
           padding: 0.75rem;
-          border-radius: 0.5rem;
+          border-radius: var(--radius-sm);
           margin-bottom: 1.5rem;
           text-align: center;
           font-size: 0.875rem;
+          font-weight: 600;
         }
       `}</style>
     </div>

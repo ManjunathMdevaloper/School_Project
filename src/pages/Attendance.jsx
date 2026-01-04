@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStudents } from '../context/StudentContext';
+import CustomSelect from '../components/CustomSelect';
 
 const Attendance = () => {
   const { students, attendance, setAttendanceForDate } = useStudents();
@@ -20,24 +21,20 @@ const Attendance = () => {
 
     let newRecord = { ...currentRecord, [field]: value };
 
-    // If marking present, clear intimation details
     if (field === 'present') {
       if (value === true) {
         newRecord.intimation = false;
         newRecord.intimatedBy = '';
         newRecord.reason = '';
-        setPopup({ message: 'Presented', color: '#15803d' }); // Green
+        setPopup({ message: 'Presented', color: '#15803d' });
       } else {
-        setPopup({ message: 'Absent', color: '#b91c1c' }); // Red
+        setPopup({ message: 'Absent', color: '#b91c1c' });
       }
-      // Clear popup after 1.5 seconds
       setTimeout(() => setPopup(null), 1500);
     }
 
     await setAttendanceForDate(selectedDate, admissionNo, newRecord);
 
-
-    // Simulate save delay for visual feedback
     setTimeout(() => {
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(''), 2000);
@@ -45,16 +42,19 @@ const Attendance = () => {
   };
 
   const filteredStudents = students.filter(s => !filterClass || s.class === filterClass);
+  const classes = [...new Set(students.map(s => s.class))].sort();
 
-  // Get unique classes
-  const classes = [...new Set(students.map(s => s.class))];
+  const classOptions = [
+    { value: '', label: 'All Classes' },
+    ...classes.map(c => ({ value: c, label: c }))
+  ];
 
   return (
     <div className="page-container section">
       {popup && (
         <div style={{
           position: 'fixed',
-          top: '80px', // Below navbar
+          top: '80px',
           left: '50%',
           transform: 'translateX(-50%)',
           backgroundColor: popup.color,
@@ -71,49 +71,47 @@ const Attendance = () => {
       )}
 
       <div className="container">
-        <div className="flex justify-between items-center mb-5" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h1 className="page-title" style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>Daily Attendance</h1>
+        <div className="flex justify-between items-center mb-5" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+          <div>
+            <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>Daily Attendance</h1>
+            <p className="text-secondary">Mark and manage daily student presence records.</p>
+          </div>
           {saveStatus === 'saved' && (
-            <span style={{ background: '#dcfce7', color: '#15803d', padding: '0.5rem 1rem', borderRadius: '2rem', fontWeight: 'bold', animation: 'fadeIn 0.3s' }}>
-              ✓ Saved
+            <span style={{ background: '#dcfce7', color: '#15803d', padding: '0.5rem 1.5rem', borderRadius: '2rem', fontSize: '0.9rem', fontWeight: 'bold', border: '1px solid #15803d' }}>
+              ✓ CHANGES SAVED
             </span>
           )}
         </div>
 
-        <div className="card mb-5">
-          <div className="grid grid-cols-2" style={{ gap: '2rem' }}>
-            <div className="form-group">
-              <label className="form-label">Select Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Filter by Class</label>
-              <select
-                className="form-control"
-                value={filterClass}
-                onChange={(e) => setFilterClass(e.target.value)}
-              >
-                <option value="">All Classes</option>
-                {classes.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+        <div className="filter-card" style={{ overflow: 'visible' }}>
+          <div className="filter-group">
+            <label>Select Date</label>
+            <input
+              type="date"
+              className="form-control"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
           </div>
+          <CustomSelect
+            containerClass="filter-group"
+            label="Class Division"
+            value={filterClass}
+            onChange={(e) => setFilterClass(e.target.value)}
+            options={classOptions}
+            placeholder="Select Class"
+          />
         </div>
 
-        <div className="card table-container">
-          <table className="table" style={{ fontSize: '0.75rem', width: '100%' }}>
+        <div className="card table-container" style={{ overflow: 'visible' }}>
+          <table className="table">
             <thead>
               <tr>
-                <th style={{ padding: '0.5rem' }}>Admission No</th>
-                <th style={{ padding: '0.5rem' }}>Name</th>
-                <th style={{ padding: '0.5rem' }}>Class</th>
-                <th style={{ padding: '0.5rem' }}>Status</th>
-                <th style={{ padding: '0.5rem' }}>Intimation Details</th>
+                <th>Admission No</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Intimation Details</th>
               </tr>
             </thead>
             <tbody>
@@ -127,28 +125,28 @@ const Attendance = () => {
 
                 return (
                   <tr key={student.admissionNo}>
-                    <td style={{ padding: '0.5rem' }}><span className="badge badge-info" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>{student.admissionNo}</span></td>
-                    <td style={{ padding: '0.5rem' }}>{student.firstName} {student.lastName}</td>
-                    <td style={{ padding: '0.5rem' }}>{student.class}</td>
-                    <td style={{ padding: '0.5rem' }}>
-                      <div className="flex gap-2" style={{ display: 'flex', gap: '0.5rem' }}>
+                    <td><span className="badge badge-info">{student.admissionNo}</span></td>
+                    <td style={{ fontWeight: '600' }}>{student.firstName} {student.lastName}</td>
+                    <td>{student.class}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
                           className={`btn btn-sm ${record.present ? 'btn-primary' : 'btn-outline'}`}
                           onClick={() => handleAttendanceChange(student.admissionNo, 'present', true)}
-                          style={{ backgroundColor: record.present ? 'var(--secondary-color)' : 'transparent', borderColor: 'var(--secondary-color)', fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}
+                          style={record.present ? { background: 'var(--primary-color)', color: 'white' } : {}}
                         >
                           Present
                         </button>
                         <button
-                          className={`btn btn-sm ${!record.present ? 'btn-primary' : 'btn-outline'}`}
+                          className={`btn btn-sm ${!record.present ? 'btn-danger' : 'btn-outline'}`}
                           onClick={() => handleAttendanceChange(student.admissionNo, 'present', false)}
-                          style={{ backgroundColor: !record.present ? '#EF4444' : 'transparent', borderColor: '#EF4444', color: !record.present ? 'white' : '#EF4444', fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}
+                          style={!record.present ? { background: '#ef4444', color: 'white', borderColor: '#ef4444' } : { color: '#ef4444', borderColor: '#ef4444' }}
                         >
                           Absent
                         </button>
                       </div>
                     </td>
-                    <td style={{ padding: '0.5rem' }}>
+                    <td>
                       <div className="flex flex-col gap-2">
                         <label className="flex items-center gap-2" style={{
                           display: 'flex',
@@ -162,32 +160,32 @@ const Attendance = () => {
                             checked={record.intimation}
                             onChange={(e) => handleAttendanceChange(student.admissionNo, 'intimation', e.target.checked)}
                             disabled={record.present}
-                            style={{ width: '1rem', height: '1rem', cursor: record.present ? 'not-allowed' : 'pointer' }}
+                            style={{ width: '1.1rem', height: '1.1rem' }}
                           />
-                          <span>Intimation Received</span>
+                          <span style={{ fontSize: '0.85rem' }}>Intimation Received</span>
                         </label>
 
                         {record.intimation && (
-                          <div className="mt-2 p-2 rounded border" style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'var(--bg-accent)', borderRadius: '0.5rem', minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <select
-                              className="form-control"
-                              style={{ fontSize: '0.8rem', padding: '0.3rem', width: '100%' }}
+                          <div className="mt-2 p-3 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <CustomSelect
+                              containerClass="compact-select"
                               value={record.intimatedBy || ''}
                               onChange={(e) => handleAttendanceChange(student.admissionNo, 'intimatedBy', e.target.value)}
-                            >
-                              <option value="">-- Intimated By --</option>
-                              <option value="Mother">Mother</option>
-                              <option value="Father">Father</option>
-                              <option value="Guardian">Guardian</option>
-                              <option value="Relative">Relative</option>
-                              <option value="Self">Self</option>
-                              <option value="Other">Other</option>
-                            </select>
+                              options={[
+                                { value: '', label: '-- Intimated By --' },
+                                { value: 'Mother', label: 'Mother' },
+                                { value: 'Father', label: 'Father' },
+                                { value: 'Guardian', label: 'Guardian' },
+                                { value: 'Relative', label: 'Relative' },
+                                { value: 'Self', label: 'Self' },
+                                { value: 'Other', label: 'Other' },
+                              ]}
+                            />
                             <input
                               type="text"
                               className="form-control"
                               placeholder="Reason for absence..."
-                              style={{ fontSize: '0.8rem', padding: '0.3rem', width: '100%' }}
+                              style={{ padding: '0.5rem', fontSize: '0.8rem' }}
                               value={record.reason || ''}
                               onChange={(e) => handleAttendanceChange(student.admissionNo, 'reason', e.target.value)}
                             />
@@ -199,7 +197,7 @@ const Attendance = () => {
                 );
               })}
               {filteredStudents.length === 0 && (
-                <tr><td colSpan="5" className="text-center" style={{ padding: '0.5rem' }}>No students found.</td></tr>
+                <tr><td colSpan="5" className="text-center py-8 text-secondary">No students found matching your filters.</td></tr>
               )}
             </tbody>
           </table>
@@ -210,6 +208,7 @@ const Attendance = () => {
             from { transform: translate(-50%, -20px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
         }
+        .btn-danger:hover { background: #dc2626 !important; border-color: #dc2626 !important; color: white !important; }
       `}</style>
     </div>
   );

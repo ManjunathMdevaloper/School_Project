@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useStudents } from '../context/StudentContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import CustomSelect from '../components/CustomSelect';
 
 const ManageData = () => {
-    const { students, attendance, marks, forceSyncWithJSON } = useStudents();
+    const { students, attendance, marks } = useStudents();
 
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedStudent, setSelectedStudent] = useState('');
@@ -233,68 +234,50 @@ const ManageData = () => {
     return (
         <div className="page-container section">
             <div className="container">
-                <h1 className="page-title mb-5" style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Manage Student Data</h1>
+                <div style={{ marginBottom: '3rem' }}>
+                    <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Performance Analytics</h1>
+                    <p className="text-secondary">Generate and export detailed student performance reports.</p>
+                </div>
 
-                {/* Filters */}
+                <div className="filter-card mb-5" style={{ overflow: 'visible' }}>
+                    <CustomSelect
+                        label="Selected Class"
+                        value={selectedClass}
+                        onChange={(e) => {
+                            setSelectedClass(e.target.value);
+                            setSelectedStudent('');
+                        }}
+                        options={[{ value: '', label: '-- All Classes --' }, ...classes.map(c => ({ value: c, label: c }))]}
+                    />
 
-                <div className="card mb-5">
-                    <div className="grid grid-cols-3" style={{ gap: '1.5rem' }}>
-                        <div className="form-group">
-                            <label className="form-label">Select Class</label>
-                            <select
-                                className="form-control"
-                                value={selectedClass}
-                                onChange={(e) => {
-                                    setSelectedClass(e.target.value);
-                                    setSelectedStudent('');
-                                }}
-                            >
-                                <option value="">-- All Classes --</option>
-                                {classes.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
+                    <CustomSelect
+                        label="Selected Student"
+                        value={selectedStudent}
+                        onChange={(e) => setSelectedStudent(e.target.value)}
+                        options={[{ value: '', label: '-- Select Student --' }, ...filteredStudents.map(s => ({ value: s.admissionNo, label: `${s.firstName} ${s.lastName} (${s.admissionNo})` }))]}
+                    />
 
-                        <div className="form-group">
-                            <label className="form-label">Select Student</label>
-                            <select
-                                className="form-control"
-                                value={selectedStudent}
-                                onChange={(e) => setSelectedStudent(e.target.value)}
-                                disabled={!filteredStudents.length}
-                            >
-                                <option value="">-- Select Student --</option>
-                                {filteredStudents.map(s => (
-                                    <option key={s.admissionNo} value={s.admissionNo}>
-                                        {s.firstName} {s.lastName} ({s.class})
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">Time Period</label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <select
+                    <div className="filter-group">
+                        <label>Analytics Period</label>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <CustomSelect
+                                containerClass="flex-1"
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                                options={[
+                                    { value: 'month', label: 'Monthly' },
+                                    { value: 'all', label: 'All Time' }
+                                ]}
+                            />
+                            {filterType === 'month' && (
+                                <input
+                                    type="month"
                                     className="form-control"
-                                    value={filterType}
-                                    onChange={(e) => setFilterType(e.target.value)}
-                                    style={{ flex: 1 }}
-                                >
-                                    <option value="month">Specific Month</option>
-                                    <option value="all">All Months</option>
-                                </select>
-                                {filterType === 'month' && (
-                                    <input
-                                        type="month"
-                                        className="form-control"
-                                        value={selectedMonth}
-                                        onChange={(e) => setSelectedMonth(e.target.value)}
-                                        style={{ flex: 1.5 }}
-                                    />
-                                )}
-                            </div>
+                                    value={selectedMonth}
+                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                    style={{ flex: 1.5 }}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -418,7 +401,18 @@ const ManageData = () => {
                                                                 {mark.marks}
                                                             </span>
                                                         </td>
-                                                        <td style={{ padding: '0.5rem' }}>{mark.status}</td>
+                                                        <td style={{ padding: '0.5rem' }}>
+                                                            <span className="badge" style={{
+                                                                fontSize: '0.7rem',
+                                                                padding: '0.15rem 0.4rem',
+                                                                background: mark.status === 'Pass' ? '#dcfce7' : '#fee2e2',
+                                                                color: mark.status === 'Pass' ? '#15803d' : '#b91c1c',
+                                                                borderRadius: '4px',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                {mark.status}
+                                                            </span>
+                                                        </td>
                                                         <td style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{mark.remarks || '-'}</td>
                                                     </tr>
                                                 ))}

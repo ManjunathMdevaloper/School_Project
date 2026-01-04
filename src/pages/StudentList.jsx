@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import { useStudents } from '../context/StudentContext';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import CustomSelect from '../components/CustomSelect';
 
 const StudentList = () => {
   const { students, addStudent, addStudentsBulk, deleteStudent } = useStudents();
@@ -39,7 +40,6 @@ const StudentList = () => {
 
   const [message, setMessage] = useState('');
 
-  // Get unique classes for dropdown
   const classes = [...new Set(students.map(s => s.class))].sort((a, b) =>
     a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
   );
@@ -71,7 +71,6 @@ const StudentList = () => {
       setIsSubmitting(false);
     }
   };
-
 
   const handleBulkUpload = (e) => {
     const file = e.target.files[0];
@@ -125,106 +124,98 @@ const StudentList = () => {
     e.target.value = null;
   };
 
+  const classOptions = [
+    { value: '', label: 'All Classes' },
+    ...classes.map(c => ({ value: c, label: c }))
+  ];
+
   return (
     <div className="page-container section">
       <div className="container">
         <div className="flex-responsive mb-5">
           <div>
-            <h1 className="page-title" style={{ fontSize: '2rem', fontWeight: 'bold' }}>Student List</h1>
-            <p className="text-secondary">Total Students: {students.length}</p>
+            <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Student List</h1>
+            <p className="text-secondary">A comprehensive view of your student body.</p>
           </div>
-          <div>
+          <div className="flex gap-4">
             {userRole === 'admin' && (
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textAlign: 'right' }}>
-                Excel Columns: First Name, Last Name, Class, Roll No, Parent Name, Phone, Email
-              </p>
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleBulkUpload}
+                  style={{ display: 'none' }}
+                  accept=".xlsx, .xls"
+                />
+                <button className="btn btn-outline" onClick={() => fileInputRef.current.click()}>
+                  Import Excel
+                </button>
+                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                  + Add Student
+                </button>
+              </>
             )}
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              {userRole === 'admin' && (
-                <>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleBulkUpload}
-                    style={{ display: 'none' }}
-                    accept=".xlsx, .xls"
-                  />
-                  <button className="btn btn-outline" onClick={() => fileInputRef.current.click()}>
-                    Import Excel
-                  </button>
-                  <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                    + Add New Student
-                  </button>
-                </>
-              )}
-            </div>
           </div>
         </div>
 
-        <div className="card mb-5">
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search by name or admission number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
-              <select
-                className="form-control"
-                value={filterClass}
-                onChange={(e) => setFilterClass(e.target.value)}
-              >
-                <option value="">-- All Classes --</option>
-                {classes.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+        <div className="filter-card" style={{ overflow: 'visible' }}>
+          <div className="filter-group flex-4">
+            <label>Search Directory</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by name, ID or roll number..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <CustomSelect
+            containerClass="filter-group flex-1"
+            label="Class Division"
+            value={filterClass}
+            onChange={(e) => setFilterClass(e.target.value)}
+            options={classOptions}
+            placeholder="Filter by Class"
+          />
         </div>
 
         {message && (
-          <div className={`card mb-5 p-3 rounded ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-            style={{ padding: '1rem', backgroundColor: message.includes('Error') ? '#fee2e2' : '#dcfce7', color: message.includes('Error') ? '#b91c1c' : '#15803d', borderRadius: '0.5rem' }}>
+          <div className={`card mb-5 p-4 rounded-lg flex items-center gap-3 ${message.includes('Error') ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}
+            style={{ border: '1px solid currentColor' }}>
             {message}
           </div>
         )}
 
         <div className="card table-container">
-          <table className="table" style={{ fontSize: '0.75rem', width: '100%' }}>
+          <table className="table">
             <thead>
               <tr>
-                <th style={{ padding: '0.5rem' }}>Admission No</th>
-                <th style={{ padding: '0.5rem' }}>Name</th>
-                <th style={{ padding: '0.5rem' }}>Class</th>
-                <th style={{ padding: '0.5rem' }}>Roll No</th>
-                <th style={{ padding: '0.5rem' }}>Parent Name</th>
-                <th style={{ padding: '0.5rem' }}>Contact</th>
-                <th style={{ padding: '0.5rem' }}>Actions</th>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Class</th>
+                <th>Roll No</th>
+                <th>Parent Name</th>
+                <th>Contact</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.map(student => (
                 <tr key={student.admissionNo}>
-                  <td style={{ padding: '0.5rem' }}><span className="badge badge-info" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>{student.admissionNo}</span></td>
-                  <td style={{ padding: '0.5rem' }}>{student.firstName} {student.lastName}</td>
-                  <td style={{ padding: '0.5rem' }}>{student.class}</td>
-                  <td style={{ padding: '0.5rem' }}>{student.rollNo}</td>
-                  <td style={{ padding: '0.5rem' }}>{student.parentName || '-'}</td>
-                  <td style={{ padding: '0.5rem' }}>{student.phone}</td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Link to={`/overview?id=${student.admissionNo}`} className="btn btn-sm btn-outline" style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem' }}>
-                        View
+                  <td><span className="badge badge-info">{student.admissionNo}</span></td>
+                  <td style={{ fontWeight: '600' }}>{student.firstName} {student.lastName}</td>
+                  <td>{student.class}</td>
+                  <td>{student.rollNo}</td>
+                  <td>{student.parentName || '-'}</td>
+                  <td>{student.phone}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <Link to={`/overview?id=${student.admissionNo}`} className="btn btn-sm btn-outline">
+                        View Profile
                       </Link>
                       {userRole === 'admin' && (
                         <button
-                          className="btn btn-sm btn-outline"
-                          style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderColor: '#ef4444', color: '#ef4444' }}
+                          className="btn btn-sm btn-outline btn-danger"
                           onClick={() => {
                             if (window.confirm('Are you sure you want to delete this student?')) {
                               deleteStudent(student.admissionNo);
@@ -242,7 +233,7 @@ const StudentList = () => {
               ))}
               {filteredStudents.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="text-center" style={{ padding: '0.5rem' }}>No students found.</td>
+                  <td colSpan="7" className="text-center py-8 text-secondary">No students found matching your criteria.</td>
                 </tr>
               )}
             </tbody>
@@ -250,7 +241,6 @@ const StudentList = () => {
         </div>
       </div>
 
-      {/* Add Student Modal */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
@@ -263,7 +253,7 @@ const StudentList = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2" style={{ gap: '1rem' }}>
+              <div className="grid grid-cols-2" style={{ gap: '1.5rem' }}>
                 <div className="form-group">
                   <label className="form-label">First Name</label>
                   <input required name="firstName" value={formData.firstName} onChange={handleInputChange} className="form-control" />
@@ -274,44 +264,26 @@ const StudentList = () => {
                 </div>
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <label className="form-label" style={{ marginBottom: 0 }}>Class</label>
+                    <label className="form-label" style={{ marginBottom: 0 }}>Class Division</label>
                     <button
                       type="button"
                       onClick={() => {
                         setIsManualClass(!isManualClass);
                         setFormData(prev => ({ ...prev, class: '' }));
                       }}
-                      style={{
-                        fontSize: '0.7rem',
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--primary-color)',
-                        textDecoration: 'underline',
-                        cursor: 'pointer'
-                      }}
+                      style={{ fontSize: '0.7rem', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
                       {isManualClass ? 'Switch to Select' : 'Type Manually'}
                     </button>
                   </div>
 
                   {!isManualClass ? (
-                    <select
-                      required
-                      name="class"
+                    <CustomSelect
                       value={formData.class}
-                      onChange={handleInputChange}
-                      className="form-control"
-                    >
-                      <option value="">Select Class</option>
-                      {/* Show existing classes from DB */}
-                      {classes.length > 0 && classes.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                      {/* Fallback default classes if none in DB */}
-                      {classes.length === 0 && Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`).map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
+                      onChange={(e) => handleInputChange({ target: { name: 'class', value: e.target.value } })}
+                      options={classes.map(c => ({ value: c, label: c }))}
+                      placeholder="Select Class"
+                    />
                   ) : (
                     <input
                       required
@@ -326,7 +298,7 @@ const StudentList = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Roll No</label>
+                  <label className="form-label">Roll Number</label>
                   <input required type="text" name="rollNo" value={formData.rollNo} onChange={handleInputChange} className="form-control" />
                 </div>
                 <div className="form-group">
@@ -334,24 +306,18 @@ const StudentList = () => {
                   <input required name="parentName" value={formData.parentName} onChange={handleInputChange} className="form-control" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Phone</label>
+                  <label className="form-label">Phone Number</label>
                   <input required name="phone" value={formData.phone} onChange={handleInputChange} className="form-control" />
                 </div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Email</label>
+              <div className="form-group mt-4">
+                <label className="form-label">Email Address</label>
                 <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="form-control" />
               </div>
-              <div className="text-center mt-4" style={{ marginTop: '1.5rem' }}>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ width: '100%' }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Adding...' : 'Create Student'}
+              <div className="text-center mt-6">
+                <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting}>
+                  {isSubmitting ? 'Registering...' : 'Complete Registration'}
                 </button>
-
               </div>
             </form>
           </div>

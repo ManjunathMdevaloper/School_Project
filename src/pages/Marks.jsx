@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { useStudents } from '../context/StudentContext';
+import CustomSelect from '../components/CustomSelect';
 
 const Marks = () => {
   const {
@@ -12,41 +13,34 @@ const Marks = () => {
     lastImport,
     undoLastImport
   } = useStudents();
-  const [activeTab, setActiveTab] = useState('single'); // single or import
+  const [activeTab, setActiveTab] = useState('single');
 
-  // Single Entry State
-  // ... (existing state)
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [examDate, setExamDate] = useState(new Date().toISOString().split('T')[0]);
   const [subject, setSubject] = useState('');
   const [marks, setMarks] = useState('');
+  const [maxMarks, setMaxMarks] = useState(100);
   const [status, setStatus] = useState('Pass');
   const [remarks, setRemarks] = useState('');
   const [message, setMessage] = useState('');
 
   const handleUndo = async () => {
-    if (window.confirm('Are you sure you want to undo the last import? This will remove all marks added in that session.')) {
+    if (window.confirm('Are you sure you want to undo the last import?')) {
       const count = await undoLastImport();
       setMessage(`Successfully reverted ${count} records.`);
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
-  // ... (rest of the file remains similar)
-
-  // Filter students based on selected class
   const [importData, setImportData] = useState('');
 
-  // Filter students based on selected class
   const filteredStudents = selectedClass
     ? students.filter(s => s.class === selectedClass)
     : students;
 
-  // Get unique classes
-  // Get unique classes
   const classes = React.useMemo(() => {
     const allClasses = [...new Set(students.map(s => s.class))].sort();
     if (selectedSchedule) {
@@ -58,7 +52,28 @@ const Marks = () => {
     return allClasses;
   }, [students, selectedSchedule, examSchedules]);
 
-  // Reset selected class if it's not in the available classes when schedule changes
+  const isAbsent = selectedStudent && attendance[examDate] && attendance[examDate][selectedStudent]?.present === false;
+
+  // Update max marks when schedule changes
+  React.useEffect(() => {
+    if (selectedSchedule) {
+      const sch = examSchedules.find(s => s.id === selectedSchedule);
+      if (sch && sch.totalMarks) {
+        setMaxMarks(Number(sch.totalMarks));
+      }
+    }
+  }, [selectedSchedule, examSchedules]);
+
+  // Recalculate status when marks or maxMarks change
+  React.useEffect(() => {
+    if (marks !== '' && !isAbsent) {
+      const obtained = Number(marks);
+      const total = Number(maxMarks) || 100;
+      const passMarks = Math.ceil(total * 0.35);
+      setStatus(obtained >= passMarks ? 'Pass' : 'Fail');
+    }
+  }, [marks, maxMarks, isAbsent]);
+
   React.useEffect(() => {
     if (selectedClass && !classes.includes(selectedClass)) {
       setSelectedClass('');
@@ -66,10 +81,6 @@ const Marks = () => {
     }
   }, [classes, selectedClass]);
 
-  // Check if student is absent on the selected date
-  const isAbsent = selectedStudent && attendance[examDate] && attendance[examDate][selectedStudent]?.present === false;
-
-  // Sync selectedMonth with examDate
   React.useEffect(() => {
     if (examDate) {
       setSelectedMonth(examDate.slice(0, 7));
@@ -77,7 +88,6 @@ const Marks = () => {
   }, [examDate]);
 
   const handleSingleSubmit = async (e) => {
-
     e.preventDefault();
     if (!selectedStudent || !subject) {
       setMessage('Please select student and subject');
@@ -85,36 +95,27 @@ const Marks = () => {
     }
 
     if (isAbsent) {
-      setMessage('Cannot enter marks: Student is marked absent on this date.');
+      setMessage('Cannot enter marks: Student is marked absent.');
+      return;
+    }
+
+    if (marks !== '' && Number(marks) > Number(maxMarks)) {
+      setMessage(`Error: Marks obtained (${marks}) cannot be greater than Max Marks (${maxMarks})`);
       return;
     }
 
     await updateMarks(selectedStudent, selectedMonth, subject, {
       marks: Number(marks),
+      totalMarks: Number(maxMarks), // Save the total marks context
       status,
       remarks,
       date: examDate
     });
 
-
     setMessage('Marks updated successfully!');
     setTimeout(() => setMessage(''), 3000);
-
-    // Reset some fields
     setMarks('');
     setRemarks('');
-  };
-
-  const handleImport = () => {
-    try {
-      const parsed = JSON.parse(importData);
-      if (!Array.isArray(parsed)) throw new Error('Data must be an array');
-      importMarksFromArray(parsed, selectedMonth);
-      setMessage(`Successfully imported ${parsed.length} records.`);
-      setImportData('');
-    } catch (err) {
-      setMessage('Error importing data: ' + err.message);
-    }
   };
 
   const handleFileUpload = (e) => {
@@ -123,36 +124,29 @@ const Marks = () => {
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
-
       try {
         const bstr = evt.target.result;
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws);
-        console.log('Total students in context:', students.length);
-        console.log('Sample student from context:', students[0]);
-        console.log('Excel Data Sample (first row):', data[0]);
 
         let successCount = 0;
         let failCount = 0;
         const failedRows = [];
 
         const formattedData = data.map((row, index) => {
-          // Helper to find key case-insensitively and handle spaces
           const getKey = (key) => Object.keys(row).find(k => k.toLowerCase().replace(/\s/g, '') === key.toLowerCase().replace(/\s/g, ''));
 
-          const marksKey = getKey('marks') || getKey('mark') || getKey('obtainedmarks');
-          const marksVal = marksKey ? row[marksKey] : undefined;
-
-          const subjectKey = getKey('subject') || getKey('subjectname');
-          const subjectVal = subjectKey ? row[subjectKey] : undefined;
-
+          const marksVal = row[getKey('marks') || getKey('mark') || getKey('obtainedmarks')];
+          const totalMarksVal = row[getKey('totalmarks') || getKey('maxmarks') || getKey('outOf')] || 100;
+          const subjectVal = row[getKey('subject') || getKey('subjectname')];
           let admissionNo = row[getKey('admissionNo')] || row[getKey('admissionno')] || row[getKey('id')];
 
+          // Lookup Logic If Admission No is missing
           if (!admissionNo) {
             const className = row[getKey('class')] || row[getKey('grade')];
-            const rollNo = row[getKey('rollno')] || row[getKey('rollno')];
+            const rollNo = row[getKey('rollno')];
             const name = row[getKey('name')] || row[getKey('studentname')] || row[getKey('student')];
 
             if (className) {
@@ -168,7 +162,7 @@ const Marks = () => {
                 if (found) admissionNo = found.admissionNo;
               }
 
-              // Try Name if no admissionNo yet OR if roll matching failed
+              // Try Name matching if roll matching failed or no roll provided
               if (!admissionNo && name) {
                 const cleanName = String(name).trim().toLowerCase();
                 const found = students.find(s => {
@@ -184,21 +178,35 @@ const Marks = () => {
             }
           }
 
-          const isValid = admissionNo && subjectVal && marksVal !== undefined && marksVal !== '';
+          if (admissionNo && subjectVal && marksVal !== undefined && marksVal !== '') {
+            const obtained = Number(marksVal);
+            const total = Number(totalMarksVal);
 
-          if (isValid) {
+            if (obtained > total) {
+              failCount++;
+              failedRows.push({
+                row: index + 2,
+                name: row[getKey('name')] || row[getKey('studentname')] || 'Unknown',
+                class: row[getKey('class')] || 'Unknown',
+                reason: `Marks (${obtained}) exceed Max Marks (${total})`
+              });
+              return null;
+            }
+
             successCount++;
+            const passMarks = Math.ceil(total * 0.35);
             return {
-              admissionNo,
+              admissionNo: String(admissionNo),
               subject: subjectVal,
-              marks: marksVal,
-              status: row[getKey('status')] || (Number(marksVal) >= 35 ? 'Pass' : 'Fail'),
+              marks: obtained,
+              totalMarks: total,
+              status: row[getKey('status')] || (obtained >= passMarks ? 'Pass' : 'Fail'),
               remarks: row[getKey('remarks')] || ''
             };
           } else {
             failCount++;
             failedRows.push({
-              row: index + 2, // 1-indexed + header
+              row: index + 2,
               name: row[getKey('name')] || row[getKey('studentname')] || 'Unknown',
               class: row[getKey('class')] || 'Unknown',
               reason: !admissionNo ? 'Student not found (check Class/Roll No)' : (!subjectVal ? 'Missing Subject' : 'Missing Marks')
@@ -213,14 +221,14 @@ const Marks = () => {
 
         await importMarksFromArray(formattedData, selectedMonth);
 
-        let finalMsg = `Successfully imported ${successCount} records from Excel.`;
+        let finalMsg = `Successfully imported ${successCount} records.`;
         if (failCount > 0) {
           finalMsg += ` ${failCount} records failed (Check console for details).`;
           console.warn('Failed Import Rows:', failedRows);
         }
         setMessage(finalMsg);
       } catch (err) {
-        setMessage('Error parsing Excel file: ' + err.message);
+        setMessage('Error parsing Excel: ' + err.message);
       }
     };
     reader.readAsBinaryString(file);
@@ -229,219 +237,158 @@ const Marks = () => {
   return (
     <div className="page-container section">
       <div className="container">
-        <h1 className="page-title mb-5" style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Marks Management</h1>
+        <div style={{ marginBottom: '3rem' }}>
+          <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Marks Management</h1>
+          <p className="text-secondary">Track academic performance across classes and subjects.</p>
+        </div>
 
-        <div className="card mb-5">
-          <div className="flex gap-4 mb-4" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="card mb-5" style={{ overflow: 'visible' }}>
+          <div className="flex gap-4 mb-8 p-1 rounded-xl" style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', background: 'rgba(150, 150, 150, 0.1)', width: 'fit-content' }}>
             <button
-              className={`btn ${activeTab === 'single' ? 'btn-primary' : 'btn-outline'}`}
+              className={`btn ${activeTab === 'single' ? 'btn-primary' : ''}`}
               onClick={() => setActiveTab('single')}
+              style={activeTab !== 'single' ? { background: 'transparent', color: 'var(--text-secondary)' } : {}}
             >
-              Single Entry
+              Manual Entry
             </button>
             <button
-              className={`btn ${activeTab === 'import' ? 'btn-primary' : 'btn-outline'}`}
+              className={`btn ${activeTab === 'import' ? 'btn-primary' : ''}`}
               onClick={() => setActiveTab('import')}
+              style={activeTab !== 'import' ? { background: 'transparent', color: 'var(--text-secondary)' } : {}}
             >
-              Bulk Import
+              Excel Import
             </button>
-
             {lastImport && lastImport.records.length > 0 && (
-              <button
-                className="btn btn-outline"
-                style={{ marginLeft: 'auto', borderColor: '#ef4444', color: '#ef4444' }}
-                onClick={handleUndo}
-              >
-                Undo Last Import
-              </button>
+              <button className="btn" style={{ marginLeft: '1rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleUndo}>Revert Last Import</button>
             )}
           </div>
 
           {message && (
-            <div className={`p-3 mb-4 rounded ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
-              style={{ padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', backgroundColor: message.includes('Error') ? '#fee2e2' : '#dcfce7', color: message.includes('Error') ? '#b91c1c' : '#15803d' }}>
+            <div className={`p-4 mb-6 rounded-lg ${message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`} style={{ border: '1px solid currentColor' }}>
               {message}
             </div>
           )}
 
           {activeTab === 'single' ? (
             <form onSubmit={handleSingleSubmit}>
-              <div className="grid grid-cols-2" style={{ gap: '1.5rem' }}>
+              <div className="grid grid-cols-2" style={{ gap: '2rem', marginBottom: '2rem' }}>
+                <CustomSelect
+                  label="Exam Schedule"
+                  value={selectedSchedule}
+                  onChange={(e) => { setSelectedSchedule(e.target.value); setSubject(''); }}
+                  options={[{ value: '', label: '-- Manual Entry --' }, ...examSchedules.map(sch => ({ value: sch.id, label: sch.name }))]}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Exam Schedule (Optional)</label>
-                  <select
-                    className="form-control"
-                    value={selectedSchedule}
-                    onChange={(e) => {
-                      setSelectedSchedule(e.target.value);
-                      setSubject(''); // Reset subject
-                    }}
-                  >
-                    <option value="">-- Manual Entry --</option>
-                    {examSchedules.map(sch => (
-                      <option key={sch.id} value={sch.id}>{sch.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {!selectedSchedule && (
-                  <div className="form-group">
-                    <label className="form-label">Exam Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={examDate}
-                      onChange={(e) => setExamDate(e.target.value)}
-                      required
-                    />
+                {!selectedSchedule ? (
+                  <div className="filter-group">
+                    <label>Exam Date</label>
+                    <input type="date" className="form-control" value={examDate} onChange={(e) => setExamDate(e.target.value)} required />
+                  </div>
+                ) : (
+                  <div className="filter-group">
+                    <label>Assigned Date</label>
+                    <input type="date" className="form-control" value={examDate} readOnly style={{ background: 'rgba(0,0,0,0.02)', cursor: 'not-allowed' }} />
                   </div>
                 )}
 
-                <div className="form-group">
-                  <label className="form-label">Select Class</label>
-                  <select
-                    className="form-control"
-                    value={selectedClass}
-                    onChange={(e) => {
-                      setSelectedClass(e.target.value);
-                      setSelectedStudent(''); // Reset student when class changes
-                    }}
-                  >
-                    <option value="">{selectedSchedule ? "-- Select Scheduled Class --" : "-- All Classes --"}</option>
-                    {classes.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Class"
+                  value={selectedClass}
+                  onChange={(e) => { setSelectedClass(e.target.value); setSelectedStudent(''); }}
+                  options={[{ value: '', label: '-- Select Class --' }, ...classes.map(c => ({ value: c, label: c }))]}
+                />
 
-                <div className="form-group">
-                  <label className="form-label">Select Student</label>
-                  <select
+                <CustomSelect
+                  label="Student"
+                  value={selectedStudent}
+                  onChange={(e) => setSelectedStudent(e.target.value)}
+                  options={[{ value: '', label: '-- Select Student --' }, ...filteredStudents.map(s => ({ value: s.admissionNo, label: `${s.firstName} ${s.lastName} (${s.admissionNo})` }))]}
+                />
+
+                <CustomSelect
+                  label="Subject"
+                  value={subject}
+                  onChange={(e) => {
+                    const sub = e.target.value;
+                    setSubject(sub);
+                    if (selectedSchedule) {
+                      const sch = examSchedules.find(s => s.id === selectedSchedule);
+                      const subSch = sch?.subjects.find(s => s.subject === sub);
+                      if (subSch) setExamDate(subSch.date);
+                    }
+                  }}
+                  options={[
+                    { value: '', label: '-- Select Subject --' },
+                    ...(selectedSchedule
+                      ? (examSchedules.find(s => s.id === selectedSchedule)?.subjects.map(s => ({ value: s.subject, label: `${s.subject} (${s.date})` })) || [])
+                      : ['Mathematics', 'Science', 'Social Studies', 'English', 'Telugu', 'Hindi'].map(s => ({ value: s, label: s }))
+                    )
+                  ]}
+                />
+
+                <div className="filter-group">
+                  <label>Max Marks</label>
+                  <input
+                    type="number"
                     className="form-control"
-                    value={selectedStudent}
-                    onChange={(e) => setSelectedStudent(e.target.value)}
+                    value={maxMarks}
+                    onChange={(e) => setMaxMarks(e.target.value)}
+                    readOnly={!!selectedSchedule}
+                    placeholder="Max marks for this test"
+                    style={selectedSchedule ? { background: 'rgba(0,0,0,0.02)', cursor: 'not-allowed' } : {}}
                     required
-                  >
-                    <option value="">-- Select Student --</option>
-                    {filteredStudents.map(s => (
-                      <option key={s.admissionNo} value={s.admissionNo}>
-                        {s.firstName} {s.lastName} ({s.class})
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Subject</label>
-                  <select
-                    className="form-control"
-                    value={subject}
-                    onChange={(e) => {
-                      const newSubject = e.target.value;
-                      setSubject(newSubject);
-
-                      // Auto-set date if schedule is selected
-                      if (selectedSchedule) {
-                        const schedule = examSchedules.find(s => s.id === selectedSchedule);
-                        const subjectSch = schedule?.subjects.find(s => s.subject === newSubject);
-                        if (subjectSch) {
-                          setExamDate(subjectSch.date);
-                        }
-                      }
-                    }}
-                    required
-                  >
-                    <option value="">-- Select Subject --</option>
-                    {selectedSchedule ? (
-                      // Show subjects from selected schedule
-                      examSchedules.find(s => s.id === selectedSchedule)?.subjects.map((s, i) => (
-                        <option key={i} value={s.subject}>{s.subject} ({s.date})</option>
-                      ))
-                    ) : (
-                      // Default subjects
-                      <>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="Social Studies">Social Studies</option>
-                        <option value="English">English</option>
-                        <option value="Telugu">Telugu</option>
-                        <option value="Hindi">Hindi</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Marks Obtained</label>
+                <div className="filter-group">
+                  <label>
+                    Marks Obtained
+                    <span style={{ fontSize: '0.75rem', color: 'var(--secondary-color)', marginLeft: '0.5rem', textTransform: 'none' }}>
+                      (Pass ≥ {Math.ceil(Number(maxMarks) * 0.35)})
+                    </span>
+                  </label>
                   <input
                     type="number"
                     className="form-control"
                     value={marks}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setMarks(val);
-                      if (val !== '' && !isAbsent) {
-                        setStatus(Number(val) >= 35 ? 'Pass' : 'Fail');
-                      }
-                    }}
+                    onChange={(e) => setMarks(e.target.value)}
                     disabled={isAbsent}
-                    placeholder={isAbsent ? "Student Absent" : ""}
-                    style={isAbsent ? { backgroundColor: '#fee2e2', cursor: 'not-allowed' } : {}}
+                    max={maxMarks}
+                    placeholder={isAbsent ? "Student Absent" : `Out of ${maxMarks}`}
+                    style={isAbsent ? { background: '#fee2e2', cursor: 'not-allowed' } : {}}
                   />
-                  {isAbsent && <small className="text-red-500" style={{ color: '#b91c1c', marginTop: '0.25rem', display: 'block' }}>Student is marked absent on this date.</small>}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-control"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="Pass">Pass</option>
-                    <option value="Fail">Fail</option>
-                    <option value="Absent">Absent</option>
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Result Status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  options={[
+                    { value: 'Pass', label: 'Pass' },
+                    { value: 'Fail', label: 'Fail' },
+                    { value: 'Absent', label: 'Absent' }
+                  ]}
+                />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Remarks</label>
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                  placeholder="Enter any remarks..."
-                ></textarea>
+              <div className="form-group mb-8">
+                <label className="form-label">Additional Remarks</label>
+                <textarea className="form-control" rows="3" value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Enter any teacher remarks..."></textarea>
               </div>
 
-              <button type="submit" className="btn btn-primary">Update Marks</button>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1.25rem' }}>Finalize & Save Marks</button>
             </form>
           ) : (
-            <div>
-              <div className="form-group mb-4" style={{ maxWidth: '300px', margin: '0 auto 2rem auto' }}>
-                <label className="form-label">Select Exam Month</label>
-                <input
-                  type="month"
-                  className="form-control"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  required
-                />
+            <div className="py-8">
+              <div className="form-group mb-8" style={{ maxWidth: '400px', margin: '0 auto' }}>
+                <label className="form-label" style={{ textAlign: 'center', display: 'block' }}>Exam Month</label>
+                <input type="month" className="form-control" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} required />
               </div>
 
-              <div className="mb-5 p-4 border rounded bg-gray-50" style={{ marginBottom: '2rem', border: '1px dashed #ccc', padding: '2rem', textAlign: 'center' }}>
-                <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Import from Excel</h3>
-                <p className="text-secondary mb-3">Upload a .xlsx or .xls file with columns: <strong>Class, Roll No (or Name), Subject, Marks, Status</strong></p>
-                <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileUpload}
-                  className="form-control"
-                  style={{ maxWidth: '400px', margin: '0 auto' }}
-                />
+              <div className="p-12 border-2 border-dashed rounded-xl text-center" style={{ borderColor: 'var(--secondary-color)', background: 'rgba(197, 160, 89, 0.05)' }}>
+                <h3 className="mb-4" style={{ color: 'var(--primary-color)' }}>Bulk Spreadsheet Import</h3>
+                <p className="text-secondary mb-8">Ensure your Excel file contains: Class, Roll No (or Name), Subject, and Marks.</p>
+                <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="form-control" style={{ maxWidth: '400px', margin: '0 auto' }} />
               </div>
             </div>
           )}

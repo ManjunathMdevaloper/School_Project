@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useStudents } from '../context/StudentContext';
+import CustomSelect from '../components/CustomSelect';
 
 const StudentOverview = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,7 +52,7 @@ const StudentOverview = () => {
   const attendancePercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
 
   // Get Marks
-  const studentMarks = React.useMemo(() => {
+  const studentMarks = useMemo(() => {
     if (!student || !marks[selectedId]) return [];
 
     if (filterType === 'month' && selectedMonth) {
@@ -85,121 +86,109 @@ const StudentOverview = () => {
       });
       return allMarks.sort((a, b) => b.month.localeCompare(a.month));
     }
-  }, [marks, selectedId, selectedMonth, filterType]);
+  }, [marks, selectedId, selectedMonth, filterType, student]);
 
   // Get Outpasses
   const studentOutpasses = outpasses.filter(op => op.admissionNo === selectedId);
 
   // Get Recent Absences
-  const recentAbsences = attendanceDates
+  const recentAbsences = student ? attendanceDates
     .map(date => ({ date, ...attendance[date][selectedId] }))
     .filter(record => record && !record.present)
     .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5); // Show last 5 absences
+    .slice(0, 5) : []; // Show last 5 absences
 
   return (
     <div className="page-container section">
       <div className="container">
-        <div className="header-flex mb-5">
-          <h1 className="page-title">Student Overview</h1>
-          <div className="filters-container">
-            <div className="filter-item">
-              <select
-                className="form-control"
-                value={selectedClass}
-                onChange={(e) => {
-                  setSelectedClass(e.target.value);
-                  setSelectedId(''); // Reset student when class changes
-                }}
-              >
-                <option value="">-- All Classes --</option>
-                {classes.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-            <div className="filter-item">
-              <select
-                className="form-control"
-                value={selectedId}
-                onChange={(e) => setSelectedId(e.target.value)}
-              >
-                <option value="">-- Select Student --</option>
-                {filteredStudents.map(s => (
-                  <option key={s.admissionNo} value={s.admissionNo}>
-                    {s.firstName} {s.lastName} ({s.class})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        <div style={{ marginBottom: '3rem' }}>
+          <h1 className="page-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Student Analytics</h1>
+          <p className="text-secondary">Comprehensive view of student's academic and behavioral performance.</p>
+        </div>
+
+        <div className="filter-card mb-5" style={{ overflow: 'visible' }}>
+          <CustomSelect
+            value={selectedClass}
+            onChange={(e) => {
+              setSelectedClass(e.target.value);
+              setSelectedId(''); // Reset student when class changes
+            }}
+            options={[{ value: '', label: '-- All Classes --' }, ...classes.map(c => ({ value: c, label: c }))]}
+            placeholder="Select Class"
+          />
+          <CustomSelect
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            options={[{ value: '', label: '-- Select Student --' }, ...filteredStudents.map(s => ({ value: s.admissionNo, label: `${s.firstName} ${s.lastName} (${s.admissionNo})` }))]}
+            placeholder="Select Student"
+          />
         </div>
 
         {student ? (
-          <div className="grid grid-cols-1 gap-large">
+          <div className="grid grid-cols-1 gap-large" style={{ display: 'grid', gap: '2rem' }}>
             {/* Profile Section */}
             <div className="card profile-card">
-              <div className="profile-header">
-                <div className="profile-avatar">🎓</div>
+              <div className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div className="profile-avatar" style={{ width: '80px', height: '80px', background: 'var(--bg-accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '2.5rem' }}>🎓</div>
                 <div className="profile-info">
-                  <h2>{student.firstName} {student.lastName}</h2>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{student.firstName} {student.lastName}</h2>
                   <p className="text-secondary">{student.admissionNo}</p>
                 </div>
               </div>
 
-              <div className="profile-details-grid">
+              <div className="profile-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.5rem' }}>
                 <div className="detail-box">
-                  <span className="label">Class</span>
-                  <span className="value">{student.class}</span>
+                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Class</span>
+                  <span className="value" style={{ fontWeight: 600 }}>{student.class}</span>
                 </div>
                 <div className="detail-box">
-                  <span className="label">Roll No</span>
-                  <span className="value">{student.rollNo}</span>
+                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Roll No</span>
+                  <span className="value" style={{ fontWeight: 600 }}>{student.rollNo}</span>
                 </div>
                 <div className="detail-box">
-                  <span className="label">Parent</span>
-                  <span className="value">{student.parentName || 'N/A'}</span>
+                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Parent</span>
+                  <span className="value" style={{ fontWeight: 600 }}>{student.parentName || 'N/A'}</span>
                 </div>
                 <div className="detail-box">
-                  <span className="label">Contact</span>
-                  <span className="value">{student.phone}</span>
+                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Contact</span>
+                  <span className="value" style={{ fontWeight: 600 }}>{student.phone}</span>
                 </div>
                 <div className="detail-box">
-                  <span className="label">Email</span>
-                  <span className="value">{student.email || 'N/A'}</span>
+                  <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Email</span>
+                  <span className="value" style={{ fontWeight: 600 }}>{student.email || 'N/A'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               {/* Attendance Stats */}
               <div className="card">
-                <h3 className="mb-4">Attendance Overview</h3>
-                <div className="attendance-chart">
-                  <div className="percentage-circle">
-                    <span className="percentage">{attendancePercentage}%</span>
-                    <span className="label">Overall</span>
+                <h3 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Attendance Overview</h3>
+                <div className="attendance-chart" style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                  <div className="percentage-circle" style={{ width: '120px', height: '120px', borderRadius: '50%', border: '8px solid var(--primary-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(44, 182, 125, 0.2)' }}>
+                    <span className="percentage" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary-color)' }}>{attendancePercentage}%</span>
+                    <span className="label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Overall</span>
                   </div>
                 </div>
-                <div className="attendance-stats-grid">
-                  <div className="stat-box present">
-                    <span className="count">{presentDays}</span>
-                    <span className="label">Present</span>
+                <div className="attendance-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="stat-box present" style={{ padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', background: 'rgba(44, 182, 125, 0.1)', color: '#2CB67D' }}>
+                    <span className="count" style={{ display: 'block', fontSize: '1.5rem', fontWeight: 700 }}>{presentDays}</span>
+                    <span className="label" style={{ fontSize: '0.8rem' }}>Present</span>
                   </div>
-                  <div className="stat-box absent">
-                    <span className="count">{absentDays}</span>
-                    <span className="label">Absent</span>
+                  <div className="stat-box absent" style={{ padding: '1rem', borderRadius: '0.5rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}>
+                    <span className="count" style={{ display: 'block', fontSize: '1.5rem', fontWeight: 700 }}>{absentDays}</span>
+                    <span className="label" style={{ fontSize: '0.8rem' }}>Absent</span>
                   </div>
                 </div>
-                <div className="text-center mt-4 text-secondary text-sm">
+                <div className="text-center mt-4 text-secondary" style={{ textAlign: 'center', marginTop: '1rem' }}>
                   Absent with Intimation: <strong>{absentWithIntimation}</strong>
                 </div>
               </div>
 
               {/* Recent Absences */}
               <div className="card">
-                <h3 className="mb-4">Recent Absences</h3>
-                <div className="table-container" style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'auto' }}>
+                <h3 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Recent Absences</h3>
+                <div className="table-container" style={{ maxHeight: '250px', overflowY: 'auto' }}>
                   <table className="table" style={{ fontSize: '0.75rem', width: '100%' }}>
                     <thead>
                       <tr>
@@ -210,7 +199,7 @@ const StudentOverview = () => {
                     </thead>
                     <tbody>
                       {recentAbsences.length === 0 ? (
-                        <tr><td colSpan="3" className="text-center" style={{ padding: '0.5rem' }}>No recent absences</td></tr>
+                        <tr><td colSpan="3" className="text-center" style={{ padding: '0.5rem', textAlign: 'center' }}>No recent absences</td></tr>
                       ) : (
                         recentAbsences.map((record, index) => (
                           <tr key={index}>
@@ -228,11 +217,11 @@ const StudentOverview = () => {
 
 
             {/* Second Row: Outpasses (Small) and Marks (Large) */}
-            <div className="grid grid-cols-custom-marks">
+            <div className="grid" style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: '1.5rem' }}>
               {/* Outpass History */}
               <div className="card">
-                <h3 className="mb-4">Recent Outpasses</h3>
-                <div className="table-container" style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'auto' }}>
+                <h3 className="mb-4" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Recent Outpasses</h3>
+                <div className="table-container" style={{ maxHeight: '250px', overflowY: 'auto' }}>
                   <table className="table" style={{ fontSize: '0.75rem', width: '100%' }}>
                     <thead>
                       <tr>
@@ -249,7 +238,7 @@ const StudentOverview = () => {
                           <tr key={op.id}>
                             <td style={{ padding: '0.5rem' }}>{op.date}</td>
                             <td style={{ padding: '0.5rem' }}>{op.reason}</td>
-                            <td style={{ padding: '0.5rem' }}><span className="badge badge-warning" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>{op.status}</span></td>
+                            <td style={{ padding: '0.5rem' }}><span className="badge" style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem', background: '#fef3c7', color: '#b45309' }}>{op.status}</span></td>
                           </tr>
                         ))
                       )}
@@ -260,26 +249,26 @@ const StudentOverview = () => {
 
               {/* Marks Table */}
               <div className="card">
-                <div className="flex justify-between items-center mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                  <h3 style={{ margin: 0 }}>Academic Performance</h3>
+                <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>Academic Performance</h3>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <select
-                      className="form-control"
+                    <CustomSelect
+                      containerClass="compact-select"
                       value={filterType}
                       onChange={(e) => setFilterType(e.target.value)}
-                      style={{ padding: '0.4rem', fontSize: '0.9rem' }}
-                    >
-                      <option value="month">Specific Month</option>
-                      <option value="all">All Months</option>
-                    </select>
+                      options={[
+                        { value: 'month', label: 'Monthly' },
+                        { value: 'all', label: 'All Time' }
+                      ]}
+                    />
                     {filterType === 'month' && (
                       <input
                         type="month"
                         className="form-control"
                         value={selectedMonth}
                         onChange={(e) => setSelectedMonth(e.target.value)}
-                        style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+                        style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}
                       />
                     )}
                   </div>
@@ -298,20 +287,26 @@ const StudentOverview = () => {
                     </thead>
                     <tbody>
                       {studentMarks.length === 0 ? (
-                        <tr><td colSpan={filterType === 'all' ? 5 : 4} className="text-center">No marks available.</td></tr>
+                        <tr><td colSpan={filterType === 'all' ? 5 : 4} className="text-center" style={{ textAlign: 'center', padding: '1rem' }}>No marks available.</td></tr>
                       ) : (
                         studentMarks.map((mark, index) => (
                           <tr key={index}>
                             {filterType === 'all' && (
-                              <td style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                              <td style={{ padding: '0.5rem', color: 'var(--text-secondary)' }}>
                                 {new Date(mark.month + '-01').toLocaleString('default', { month: 'short', year: 'numeric' })}
                               </td>
                             )}
                             <td style={{ padding: '0.5rem', fontWeight: '500' }}>{mark.subject}</td>
                             <td style={{ padding: '0.5rem' }}>{mark.marks}</td>
                             <td style={{ padding: '0.5rem' }}>
-                              <span className={`badge ${mark.status === 'present' ? 'badge-success' : 'badge-danger'}`}
-                                style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>
+                              <span className="badge" style={{
+                                fontSize: '0.7rem',
+                                padding: '0.15rem 0.4rem',
+                                background: mark.status === 'Pass' ? '#dcfce7' : '#fee2e2',
+                                color: mark.status === 'Pass' ? '#15803d' : '#b91c1c',
+                                borderRadius: '4px',
+                                fontWeight: 'bold'
+                              }}>
                                 {mark.status}
                               </span>
                             </td>
@@ -326,137 +321,11 @@ const StudentOverview = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-10 card">
-            <p className="text-secondary" style={{ fontSize: '1.2rem' }}>Please select a student to view their overview.</p>
+          <div className="text-center py-10 card" style={{ textAlign: 'center', padding: '5rem' }}>
+            <p className="text-secondary" style={{ fontSize: '1.2rem' }}>Please select a student to view their metrics.</p>
           </div>
         )}
       </div>
-
-      <style>{`
-        .header-flex {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 1rem;
-        }
-
-        .filters-container {
-          display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-
-        .filter-item {
-          min-width: 200px;
-        }
-
-        .gap-large { gap: 2rem; }
-
-        .grid { display: grid; gap: 1.5rem; }
-        .grid-cols-1 { grid-template-columns: 1fr; }
-        .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-        .grid-cols-custom-marks { grid-template-columns: 2fr 3fr; }
-
-        .profile-header {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .profile-avatar {
-          width: 80px;
-          height: 80px;
-          background: var(--bg-accent);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2.5rem;
-        }
-
-        .profile-details-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .detail-box {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .detail-box .label {
-          font-size: 0.8rem;
-          color: var(--text-secondary);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .detail-box .value {
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-
-        .attendance-chart {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 2rem;
-        }
-
-        .percentage-circle {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          border: 8px solid var(--primary-color);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 0 20px rgba(44, 182, 125, 0.2);
-        }
-
-        .percentage {
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--primary-color);
-        }
-
-        .attendance-stats-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
-
-        .stat-box {
-          padding: 1rem;
-          border-radius: var(--radius-md);
-          text-align: center;
-        }
-
-        .stat-box.present { background: rgba(44, 182, 125, 0.1); color: #2CB67D; }
-        .stat-box.absent { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
-
-        .stat-box .count {
-          display: block;
-          font-size: 1.5rem;
-          font-weight: 700;
-        }
-
-        .stat-box .label {
-          font-size: 0.8rem;
-          text-transform: uppercase;
-        }
-
-        @media (max-width: 768px) {
-          .filters-container { width: 100%; flex-direction: column; }
-          .filter-item { width: 100%; }
-          .profile-header { flex-direction: column; text-align: center; }
-          .grid-cols-2 { grid-template-columns: 1fr; }
-          .grid-cols-custom-marks { grid-template-columns: 1fr; }
-        }
-      `}</style>
     </div >
   );
 };
