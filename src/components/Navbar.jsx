@@ -133,8 +133,48 @@ const Navbar = () => {
 
         {/* Mobile Toggle */}
         <div className="mobile-only">
+          {userRole === 'admin' && (
+            <div
+              className="notification-container"
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            >
+              <button className="notification-icon">
+                <span className="bell-ico">🔔</span>
+                {pendingOutpasses.length > 0 && (
+                  <span className="notification-count">
+                    {pendingOutpasses.length}
+                  </span>
+                )}
+              </button>
+
+              {isNotificationOpen && (
+                <div className="notification-dropdown mobile-notif-dropdown">
+                  <h4 className="notif-title">Today's Requests</h4>
+                  {pendingOutpasses.length === 0 ? (
+                    <p className="notif-empty">No pending requests.</p>
+                  ) : (
+                    <div className="notif-list">
+                      {pendingOutpasses.map(outpass => (
+                        <div key={outpass.id} className="notif-item">
+                          <div className="notif-header">
+                            <p className="notif-name">{outpass.studentName}</p>
+                            <span className="notif-class">{outpass.class}</span>
+                          </div>
+                          <p className="notif-reason">{outpass.reason}</p>
+                          <div className="notif-actions">
+                            <button onClick={() => updateOutpassStatus(outpass.id, 'Approved')} className="notif-btn notif-btn-approve">Approve</button>
+                            <button onClick={() => updateOutpassStatus(outpass.id, 'Rejected')} className="notif-btn notif-btn-reject">Reject</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           <button onClick={toggleTheme} className="theme-toggle">{isDarkMode ? '☼' : '☾'}</button>
-          <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="menu-toggle" onClick={() => { setIsMenuOpen(!isMenuOpen); setIsNotificationOpen(false); }}>
             <div className={`hamburger ${isMenuOpen ? 'open' : ''}`}></div>
           </button>
         </div>
@@ -386,6 +426,13 @@ const Navbar = () => {
         @media (max-width: 992px) {
           .desktop-only { display: none; }
           .mobile-only { display: flex; }
+          .mobile-notif-dropdown {
+            position: fixed;
+            top: 5rem;
+            right: 0.5rem;
+            left: 0.5rem;
+            width: auto;
+          }
         }
       `}</style>
     </nav>
