@@ -390,7 +390,7 @@ const Marks = () => {
                   <p className="text-secondary mb-8" style={{ fontSize: '1rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
                     Quickly upload student marks using an Excel file. <br />
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--secondary-color)' }}>
-                      Required Columns: Class, Roll No (or Name), Subject, and Marks.
+                      Required Columns: Class, Roll No, Subject, and Marks.
                     </span>
                   </p>
 
